@@ -50,8 +50,6 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera for emotion detection</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need access to the photo library to save photos and videos.</string>
 
 </dict>
 </plist>
