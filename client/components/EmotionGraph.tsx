@@ -14,7 +14,13 @@ const emotionToScore = (emotion: string): number => {
     }
 };
 
-export default function EmotionGraph({ data }: { data: { timestamp: number; emotion: string }[] }) {
+export default function EmotionGraph({
+    data,
+    logDate,
+}: {
+    data: { timestamp: number; emotion: string }[];
+    logDate?: string;
+}) {
     const scores = data.map(e => emotionToScore(e.emotion));
 
     const chartData = {
@@ -44,6 +50,7 @@ export default function EmotionGraph({ data }: { data: { timestamp: number; emot
 
     return (
         <View style={styles.container}>
+            {logDate && <Text style={styles.logDate}>Log Date: {logDate}</Text>}
             <Text style={styles.title}>Crowd Happiness Trend</Text>
 
             <View style={styles.graphWrapper}>
@@ -77,7 +84,6 @@ export default function EmotionGraph({ data }: { data: { timestamp: number; emot
                         />
                     </View>
                 </ScrollView>
-
             </View>
 
             <Text style={styles.axisLabelX}>Time →</Text>
@@ -99,13 +105,19 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         justifyContent: 'flex-start',
     },
+    logDate: {
+        color: '#fff',
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 4,
+        marginTop: -10,
+    },
     title: {
         textAlign: 'center',
         fontSize: 24,
         fontWeight: 'bold',
         color: '#00FFFF',
         marginBottom: 16,
-        marginTop: 20,
     },
     graphWrapper: {
         flexDirection: 'row',
@@ -128,7 +140,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginLeft: 5,
     },
-
     axisLabelX: {
         color: '#fff',
         fontSize: 12,
@@ -148,7 +159,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     chartContainer: {
-        paddingLeft: 0,   
-        marginLeft: -12, 
+        paddingLeft: 0,
+        marginLeft: -12,
     },
 });

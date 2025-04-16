@@ -1,9 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Dimensions } from 'react-native';
 
-
-// const screenWidth = Dimensions.get('window').width;
 
 export default function WelcomePage() {
 
@@ -15,7 +12,7 @@ export default function WelcomePage() {
                 Record your DJ sets live and get real-time feedback based on your crowd’s emotions.
             </Text>
             <Text style={styles.instructions}>
-                Tap “Start” to begin recording. Tap “Stop Recording” to end the set and see your crowd's emotional trend.
+                Tap “Start” to begin recording. Tap “Stop Recording” to end the set and see your crowd's emotional trend. Additionally, click “Import/View Past Log” to view your past logs.                
             </Text>
         </View>
     );

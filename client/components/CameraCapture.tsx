@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
+import ConfirmationModal from './ConfirmationModal';
 
 type CameraPosition = 'front' | 'back' | 'external';
 
@@ -113,28 +114,14 @@ export default function CameraCapture({
                 </View>
             </View>
 
-            {/* Confirmation modal */}
-            {showConfirmation && (
-                <View style={styles.confirmationContainer}>
-                    <View style={styles.confirmationBox}>
-                        <Text style={styles.confirmationText}>Are you sure you want to stop recording?</Text>
-                        <View style={styles.confirmationButtonRow}>
-                            <TouchableOpacity
-                                style={styles.confirmationButton}
-                                onPress={() => onComplete(emotionLog)}
-                            >
-                                <Text style={styles.confirmationButtonText}>Yes</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.confirmationButton}
-                                onPress={() => setShowConfirmation(false)}
-                            >
-                                <Text style={styles.confirmationButtonText}>No</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            )}
+            <ConfirmationModal
+                visible={showConfirmation}
+                option1Text="Yes"
+                option2Text="No"
+                bodyText="Are you sure you want to stop recording?"
+                onPress={() => onComplete(emotionLog)}
+                onCancel={() => setShowConfirmation(false)}
+            />
 
             {/* Camera selection modal */}
             <Modal transparent visible={showModal} animationType="fade">
