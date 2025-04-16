@@ -44,7 +44,7 @@ export default function EmotionGraph({ data }: { data: { timestamp: number; emot
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>🎶 Crowd Happiness Trend</Text>
+            <Text style={styles.title}>Crowd Happiness Trend</Text>
 
             <View style={styles.graphWrapper}>
                 <View style={styles.yAxisWrapper}>
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#00FFFF',
         marginBottom: 16,
+        marginTop: 20,
     },
     graphWrapper: {
         flexDirection: 'row',
@@ -138,6 +139,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: 16,
         paddingBottom: 32,
+        marginTop: 20,
     },
     stat: {
         fontSize: 16,
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     chartContainer: {
-        paddingLeft: 0,   // <-- reduces whitespace to the left
-        marginLeft: -12,  // <-- shifts the graph more left
+        paddingLeft: 0,   
+        marginLeft: -12, 
     },
 });
