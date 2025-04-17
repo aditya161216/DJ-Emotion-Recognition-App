@@ -33,6 +33,13 @@ export default function App() {
     }
   }, [pendingImport]);
 
+  useEffect(() => {
+    fetch('https://dj-emotion-backend.onrender.com/')
+      .then(() => console.log('Warming up server'))
+      .catch((err) => console.warn('Server warm-up failed:', err));
+  }, []);
+
+
   const exportEmotionLog = async (log: { timestamp: string | number | Date; emotion: any; }[]) => {
     if (log.length === 0) {
       Alert.alert("No Data", "There's no emotion data to export.");
