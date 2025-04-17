@@ -11,6 +11,12 @@ CORS(app)
 
 detector = FER()
 
+# test route
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'Backend is running!'}), 200
+
+
 @app.route('/analyze-emotion', methods=['POST'])
 def analyze_emotion():
     data = request.json
