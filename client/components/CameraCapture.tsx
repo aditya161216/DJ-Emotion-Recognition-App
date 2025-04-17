@@ -69,11 +69,23 @@ export default function CameraCapture({
             const photo = await cameraRef.current.takePhoto();
             const base64 = await RNFS.readFile(photo.path, 'base64');
 
-            const res = await fetch('http://11.22.19.204:3000/analyze-emotion', {
+            // use this for local testing
+            // const res = await fetch('http://11.22.19.204:3000/analyze-emotion', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ image: base64 }),
+            // });
+
+            const res = await fetch('https://dj-emotion-backend.onrender.com/analyze-emotion', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64 }),
             });
+
+            if (!res.ok) {
+                const errText = await res.text(); // log error body if available
+                throw new Error(`HTTP ${res.status}: ${errText}`);
+            }
 
             const json = await res.json();
             setEmotionLog((prev) => [

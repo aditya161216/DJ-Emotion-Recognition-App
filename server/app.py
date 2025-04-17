@@ -4,6 +4,7 @@ from fer import FER
 import cv2
 import numpy as np
 import base64
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -49,4 +50,5 @@ def analyze_emotion():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000)
+    port = int(os.environ.get("PORT", 3000))
+    app.run(host='0.0.0.0', port=port)
