@@ -38,33 +38,6 @@ export default function CameraCapture({
     const devices = useCameraDevices();
     const device = devices.find((d) => d.position === cameraPosition);
 
-    const requestQueue = [] as (() => Promise<void>)[];
-    let processing = false;
-
-    const processQueue = async () => {
-        if (processing || requestQueue.length === 0) return;
-        processing = true;
-
-        const task = requestQueue.shift();
-        if (task) {
-            try {
-                await task();
-            } catch (e) {
-                console.error('Queue task failed:', e);
-            }
-        }
-
-        processing = false;
-        if (requestQueue.length > 0) {
-            setTimeout(processQueue, 100);
-        }
-    };
-
-    const enqueueRequest = (fn: () => Promise<void>) => {
-        requestQueue.push(fn);
-        processQueue();
-    };
-
     useEffect(() => {
         (async () => {
             const status = await Camera.requestCameraPermission();
@@ -76,7 +49,7 @@ export default function CameraCapture({
         if (device && hasPermission && !intervalRef.current) {
             intervalRef.current = setInterval(() => {
                 takePhotoAndSend();
-            }, 20000);
+            }, 2500);
         }
 
         return () => {
@@ -87,50 +60,49 @@ export default function CameraCapture({
         };
     }, [device, hasPermission]);
 
-    const fetchWithTimeout = (url: string, options: RequestInit, timeout = 10000): Promise<Response> => {
-        return Promise.race([
-            fetch(url, options),
-            new Promise<Response>((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), timeout)
-            )
-        ]);
-    };
-
     const takePhotoAndSend = async () => {
-        enqueueRequest(async () => {
-            if (!cameraRef.current) return;
-
+        if (!cameraRef.current) return;
+        try {
             setLoading(true);
             setFeedback('');
 
-            try {
-                const photo = await cameraRef.current.takePhoto();
-                const base64 = await RNFS.readFile(photo.path, 'base64');
+            const photo = await cameraRef.current.takePhoto();
+            const base64 = await RNFS.readFile(photo.path, 'base64');
 
-                const res = await fetchWithTimeout('https://dj-emotion-backend.onrender.com/analyze-emotion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64 }),
-                });
+            // const res = await fetch('http://172.16.36.178:3000/analyze-emotion', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ image: base64 }),
+            // });
 
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`HTTP ${res.status}: ${errorText}`);
-                }
+            // const json = await res.json();
+            // setEmotionLog((prev) => [
+            //     ...prev,
+            //     { timestamp: Date.now(), emotion: json.raw_emotion || 'None' },
+            // ]);
 
-                const json = await res.json();
-                setEmotionLog((prev) => [
-                    ...prev,
-                    { timestamp: Date.now(), emotion: json.emotion || 'None' },
-                ]);
-                setFeedback(`${json.emotion?.toUpperCase()}: ${json.feedback}`);
-            } catch (err: any) {
-                console.error('Capture error:', err.message || err);
-                setFeedback('Error analyzing emotion');
-            } finally {
-                setLoading(false);
-            }
-        });
+            // const raw = json.raw_emotion && json.raw_emotion !== 'none' ? json.raw_emotion.toUpperCase() : 'NO FACE';
+            // const proc = json.processed_emotion && json.processed_emotion !== 'none' ? json.processed_emotion.toUpperCase() : 'NO FACE';
+            // setFeedback(`RAW: ${raw} | PREPROCESSED: ${proc}\n${json.feedback}`);
+
+            const res = await fetch('http://172.16.36.178:3000/analyze-emotion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64 }),
+            });
+
+            const json = await res.json();
+            setEmotionLog((prev) => [
+                ...prev,
+                { timestamp: Date.now(), emotion: json.emotion || 'None' },
+            ]);
+            setFeedback(`${json.emotion?.toUpperCase()}: ${json.feedback}`);
+        } catch (err) {
+            console.error('Capture error:', err);
+            setFeedback('Error analyzing emotion');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -167,6 +139,7 @@ export default function CameraCapture({
                 onCancel={() => setShowConfirmation(false)}
             />
 
+            {/* Camera selection modal */}
             <Modal transparent visible={showModal} animationType="fade">
                 <View style={styles.modalContainer}>
                     <View style={styles.modalBox}>
@@ -261,6 +234,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
     },
+
     confirmationBox: {
         backgroundColor: '#222',
         padding: 24,
@@ -272,16 +246,19 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 8,
     },
+
     confirmationText: {
         fontSize: 18,
         color: '#fff',
         marginBottom: 20,
         textAlign: 'center',
     },
+
     confirmationButtonRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+
     confirmationButton: {
         flex: 1,
         marginHorizontal: 8,
@@ -290,6 +267,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
     },
+
     confirmationButtonText: {
         color: '#fff',
         fontSize: 16,
