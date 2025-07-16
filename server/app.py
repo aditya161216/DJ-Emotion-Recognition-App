@@ -73,7 +73,7 @@ def register():
         session.add(curr_user)
         session.commit()
 
-        # we also generare a  jwt token here so that the user can be logged in automatically instead of having to login manually AFTER creating an account
+        # we also generare a jwt token here so that the user can be logged in automatically instead of having to login manually AFTER creating an account
         access_token = create_access_token(identity=email)
 
         return jsonify({'message': 'User registered successfully', 'access_token': access_token}), 200
