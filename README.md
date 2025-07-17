@@ -39,6 +39,12 @@ JWT-based auth system to securely store and retrieve session data.
 ## Screenshots
 
 > Will add after deployment for UI showcase.
+<img width="1170" height="2532" alt="IMG_2585" src="https://github.com/user-attachments/assets/b16420f5-9df9-4f7a-826a-9d77b0002de9" />
+![IMG_2584](https://github.com/user-attachments/assets/47ee59f1-6b72-4d73-93ac-7a2b55ebe3d0)
+<img width="1170" height="2532" alt="IMG_2583" src="https://github.com/user-attachments/assets/85d712fc-980c-47cf-a4c4-c05fc65fd04d" />
+<img width="1170" height="2532" alt="IMG_2582" src="https://github.com/user-attachments/assets/08cca286-3e68-41f7-9e84-d281a42c786a" />
+<img width="1170" height="2532" alt="IMG_2581" src="https://github.com/user-attachments/assets/e822c040-88d8-4823-9a7f-e8453083a1c1" />
+
 
 ## Roadmap
 
