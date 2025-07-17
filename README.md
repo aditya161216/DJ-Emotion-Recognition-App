@@ -50,7 +50,7 @@ JWT-based auth system to securely store and retrieve session data.
 
 ## Roadmap
 
-✅ Basic frontend and backend integration  
+✅ Frontend and backend integration  
 ✅ JWT user authentication  
 ✅ Emotion detection pipeline  
 ✅ Data visualization and CSV export  
