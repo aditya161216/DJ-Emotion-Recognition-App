@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Button, StyleSheet, Modal } from "react-native";
+import { View, Text, StyleSheet, Modal } from "react-native";
+import CustomButton from "./CustomButton";
 
 export default function ConfirmationModal({
     visible,
@@ -23,11 +24,23 @@ export default function ConfirmationModal({
             animationType="fade"
         >
             <View style={styles.overlay}>
-                <View style={styles.saveModal}>
-                    <Text style={styles.savePromptText}>{bodyText}</Text>
-                    <View style={styles.saveButtonRow}>
-                        <Button title={option1Text} onPress={onPress} />
-                        <Button title={option2Text} color="gray" onPress={onCancel} />
+                <View style={styles.modalContainer}>
+                    <Text style={styles.bodyText}>{bodyText}</Text>
+                    <View style={styles.buttonRow}>
+                        <CustomButton
+                            title={option1Text}
+                            onPress={onPress}
+                            variant="primary"
+                            size="small"
+                            style={styles.button}
+                        />
+                        <CustomButton
+                            title={option2Text}
+                            onPress={onCancel}
+                            variant="secondary"
+                            size="small"
+                            style={styles.button}
+                        />
                     </View>
                 </View>
             </View>
@@ -38,26 +51,32 @@ export default function ConfirmationModal({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.6)", 
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
         justifyContent: "center",
         alignItems: "center",
     },
-    saveModal: {
-        backgroundColor: "#222",
-        padding: 20,
-        borderRadius: 12,
-        alignItems: "center",
-        width: "80%",
+    modalContainer: {
+        backgroundColor: "#0a0a0a",
+        padding: 24,
+        borderRadius: 16,
+        width: "85%",
+        maxWidth: 400,
+        borderWidth: 1,
+        borderColor: "#1a1a1a",
     },
-    savePromptText: {
+    bodyText: {
         color: "#fff",
-        fontSize: 18,
-        marginBottom: 16,
+        fontSize: 16,
+        marginBottom: 24,
         textAlign: "center",
+        lineHeight: 24,
     },
-    saveButtonRow: {
+    buttonRow: {
         flexDirection: "row",
-        justifyContent: "space-around",
-        width: "100%",
+        justifyContent: "space-between",
+        gap: 12,
+    },
+    button: {
+        flex: 1,
     },
 });

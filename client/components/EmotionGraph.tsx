@@ -24,14 +24,17 @@ export default function EmotionGraph({
     const scores = data.map(e => emotionToScore(e.emotion));
 
     const chartData = {
-        labels: data.map(e => {
-            const date = new Date(e.timestamp);
-            return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+        labels: data.map((e, index) => {
+            if (index % Math.ceil(data.length / 6) === 0 || index === data.length - 1) {
+                const date = new Date(e.timestamp);
+                return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+            }
+            return '';
         }),
         datasets: [{ data: scores, strokeWidth: 2 }],
     };
 
-    const dynamicWidth = Math.max(screenWidth, data.length * 50);
+    const dynamicWidth = Math.max(screenWidth - 40, data.length * 60);
 
     const avgHappiness = scores.length > 0
         ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
@@ -45,121 +48,166 @@ export default function EmotionGraph({
 
     const peakMoment = data[scores.indexOf(Math.max(...scores))];
     const peakTime = peakMoment
-        ? new Date(peakMoment.timestamp).toLocaleTimeString()
+        ? new Date(peakMoment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         : 'N/A';
 
     return (
-        <View style={styles.container}>
-            {logDate && <Text style={styles.logDate}>Log Date: {logDate}</Text>}
-            <Text style={styles.title}>Crowd Happiness Trend</Text>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+        >
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Session Overview</Text>
+                {logDate && (
+                    <Text style={styles.date}>{logDate}</Text>
+                )}
+            </View>
 
-            <View style={styles.graphWrapper}>
-                <View style={styles.yAxisWrapper}>
-                    <Text style={styles.axisLabelY}>Happiness %</Text>
-                </View>
-
+            {/* Chart */}
+            <View style={styles.chartContainer}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.chartContainer}>
-                        <LineChart
-                            data={chartData}
-                            width={dynamicWidth}
-                            height={220}
-                            yAxisSuffix="%"
-                            yLabelsOffset={10}
-                            chartConfig={{
-                                backgroundColor: '#1E2923',
-                                backgroundGradientFrom: '#08130D',
-                                backgroundGradientTo: '#08130D',
-                                decimalPlaces: 0,
-                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                                propsForDots: {
-                                    r: '4',
-                                    strokeWidth: '2',
-                                    stroke: '#00FFFF',
-                                },
-                            }}
-                            bezier
-                            style={styles.chart}
-                        />
-                    </View>
+                    <LineChart
+                        data={chartData}
+                        width={dynamicWidth}
+                        height={180}
+                        yAxisSuffix="%"
+                        yLabelsOffset={10}
+                        chartConfig={{
+                            backgroundColor: 'transparent',
+                            backgroundGradientFrom: '#000',
+                            backgroundGradientTo: '#000',
+                            decimalPlaces: 0,
+                            color: (opacity = 1) => `rgba(0, 255, 255, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity * 0.5})`,
+                            propsForDots: {
+                                r: '3',
+                                strokeWidth: '1',
+                                stroke: '#00FFFF',
+                                fill: '#000'
+                            },
+                            propsForBackgroundLines: {
+                                strokeDasharray: '3, 3',
+                                stroke: 'rgba(255, 255, 255, 0.05)',
+                                strokeWidth: 1,
+                            },
+                        }}
+                        bezier
+                        style={styles.chart}
+                        withInnerLines={true}
+                        withOuterLines={false}
+                        withVerticalLabels={true}
+                        withHorizontalLabels={true}
+                        withShadow={false}
+                    />
                 </ScrollView>
             </View>
 
-            <Text style={styles.axisLabelX}>Time →</Text>
+            {/* Metrics */}
+            <View style={styles.metricsContainer}>
+                <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>Average Happiness</Text>
+                    <Text style={styles.metricValue}>{avgHappiness}%</Text>
+                </View>
 
-            <View style={styles.statsContainer}>
-                <Text style={styles.stat}>Average Happiness: {avgHappiness}%</Text>
-                <Text style={styles.stat}>Most Common Emotion: {mostFrequentEmotion.toUpperCase()}</Text>
-                <Text style={styles.stat}>Peak Happiness Time: {peakTime}</Text>
+                <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>Dominant Emotion</Text>
+                    <Text style={styles.metricValue}>{mostFrequentEmotion}</Text>
+                </View>
+
+                <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>Peak Time</Text>
+                    <Text style={styles.metricValue}>{peakTime}</Text>
+                </View>
+
+                <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>Total Readings</Text>
+                    <Text style={styles.metricValue}>{data.length}</Text>
+                </View>
             </View>
-        </View>
+
+            {/* Insight */}
+            <View style={styles.insightContainer}>
+                <Text style={styles.insightText}>
+                    {Number(avgHappiness) >= 70
+                        ? 'Excellent crowd engagement throughout your set.'
+                        : Number(avgHappiness) >= 50
+                            ? 'Good energy levels with room for peak moments.'
+                            : 'Consider varying your track selection to boost crowd energy.'}
+                </Text>
+            </View>
+
+            {/* Spacer for buttons */}
+            <View style={{ height: 140 }} />
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop: 48,
-        paddingBottom: 16,
         flex: 1,
-        backgroundColor: 'black',
-        justifyContent: 'flex-start',
+        backgroundColor: '#000',
     },
-    logDate: {
-        color: '#fff',
-        fontSize: 14,
-        textAlign: 'center',
-        marginBottom: 4,
-        marginTop: -10,
+    scrollContent: {
+        paddingTop: 60,
+    },
+    header: {
+        paddingHorizontal: 24,
+        marginBottom: 24,
     },
     title: {
-        textAlign: 'center',
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#00FFFF',
-        marginBottom: 16,
-    },
-    graphWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-    },
-    yAxisWrapper: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 4,
-    },
-    axisLabelY: {
-        transform: [{ rotate: '-90deg' }],
+        fontWeight: '600',
         color: '#fff',
-        fontSize: 12,
-        width: 70,
-        textAlign: 'center',
+        marginBottom: 4,
     },
-    chart: {
-        borderRadius: 8,
-        marginLeft: 5,
-    },
-    axisLabelX: {
-        color: '#fff',
-        fontSize: 12,
-        textAlign: 'center',
-        marginTop: 6,
-    },
-    statsContainer: {
-        paddingHorizontal: 20,
-        paddingTop: 16,
-        paddingBottom: 32,
-        marginTop: 20,
-    },
-    stat: {
-        fontSize: 16,
-        color: '#fff',
-        marginBottom: 6,
-        textAlign: 'center',
+    date: {
+        fontSize: 14,
+        color: '#666',
     },
     chartContainer: {
-        paddingLeft: 0,
-        marginLeft: -12,
+        marginBottom: 32,
+        paddingLeft: 24,
+    },
+    chart: {
+        marginRight: 24,
+    },
+    metricsContainer: {
+        paddingHorizontal: 24,
+        marginBottom: 24,
+    },
+    metricRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    metricLabel: {
+        fontSize: 15,
+        color: '#888',
+        fontWeight: '400',
+    },
+    metricValue: {
+        fontSize: 15,
+        color: '#fff',
+        fontWeight: '500',
+        textTransform: 'capitalize',
+    },
+    insightContainer: {
+        marginHorizontal: 24,
+        padding: 16,
+        backgroundColor: 'rgba(0, 255, 255, 0.05)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 255, 255, 0.1)',
+    },
+    insightText: {
+        fontSize: 14,
+        color: '#00FFFF',
+        lineHeight: 20,
+        textAlign: 'center',
     },
 });

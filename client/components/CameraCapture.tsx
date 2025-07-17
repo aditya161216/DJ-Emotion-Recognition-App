@@ -4,15 +4,18 @@ import {
     Text,
     StyleSheet,
     ActivityIndicator,
-    Button,
     Modal,
     TouchableOpacity,
 } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import ConfirmationModal from './ConfirmationModal';
+import CustomButton from './CustomButton';
 
 type CameraPosition = 'front' | 'back' | 'external';
+
+// const API_BASE_URL = 'http://172.16.36.178:3000'; 
+const API_BASE_URL = 'http://10.0.0.163:3000';
 
 export default function CameraCapture({
     onComplete,
@@ -25,6 +28,7 @@ export default function CameraCapture({
 }) {
     const [hasPermission, setHasPermission] = useState(false);
     const [feedback, setFeedback] = useState('');
+    const [currentEmotion, setCurrentEmotion] = useState('');
     const [loading, setLoading] = useState(false);
     const [emotionLog, setEmotionLog] = useState<
         { timestamp: number; emotion: string }[]
@@ -64,70 +68,79 @@ export default function CameraCapture({
         if (!cameraRef.current) return;
         try {
             setLoading(true);
-            setFeedback('');
 
             const photo = await cameraRef.current.takePhoto();
             const base64 = await RNFS.readFile(photo.path, 'base64');
 
-            // const res = await fetch('http://172.16.36.178:3000/analyze-emotion', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ image: base64 }),
-            // });
-
-            // const json = await res.json();
-            // setEmotionLog((prev) => [
-            //     ...prev,
-            //     { timestamp: Date.now(), emotion: json.raw_emotion || 'None' },
-            // ]);
-
-            // const raw = json.raw_emotion && json.raw_emotion !== 'none' ? json.raw_emotion.toUpperCase() : 'NO FACE';
-            // const proc = json.processed_emotion && json.processed_emotion !== 'none' ? json.processed_emotion.toUpperCase() : 'NO FACE';
-            // setFeedback(`RAW: ${raw} | PREPROCESSED: ${proc}\n${json.feedback}`);
-
-            const res = await fetch('http://172.16.36.178:3000/analyze-emotion', {
+            const res = await fetch(`${API_BASE_URL}/analyze-emotion`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64 }),
             });
 
             const json = await res.json();
+            const emotion = json.emotion || 'None';
             setEmotionLog((prev) => [
                 ...prev,
-                { timestamp: Date.now(), emotion: json.emotion || 'None' },
+                { timestamp: Date.now(), emotion },
             ]);
-            setFeedback(`${json.emotion?.toUpperCase()}: ${json.feedback}`);
+            setCurrentEmotion(emotion);
+            setFeedback(json.feedback || '');
         } catch (err) {
             console.error('Capture error:', err);
-            setFeedback('Error analyzing emotion');
+            setCurrentEmotion('Error');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.container}>
             {hasPermission && device ? (
                 <Camera
                     ref={cameraRef}
-                    style={{ flex: 1 }}
+                    style={StyleSheet.absoluteFillObject}
                     device={device}
                     isActive={true}
                     photo={true}
                 />
             ) : (
                 <View style={styles.centered}>
-                    <Text>Camera is loading or permission not granted.</Text>
+                    <Text style={styles.permissionText}>Waiting for camera permission...</Text>
                 </View>
             )}
 
-            <View style={styles.overlay}>
-                {loading && <ActivityIndicator size="small" color="#fff" />}
-                {feedback !== '' && <Text style={styles.feedback}>{feedback}</Text>}
-                <Button title="Stop Recording" onPress={() => setShowConfirmation(true)} />
-                <View style={{ marginTop: 10 }}>
-                    <Button title="Select Camera" onPress={() => setShowModal(true)} />
-                </View>
+            {/* Top overlay - emotion feedback */}
+            <View style={styles.topOverlay}>
+                {currentEmotion && (
+                    <View style={styles.emotionContainer}>
+                        <Text style={styles.emotionText}>
+                            {currentEmotion.charAt(0).toUpperCase() + currentEmotion.slice(1).toLowerCase()}
+                        </Text>
+                        {feedback !== '' && (
+                            <Text style={styles.feedbackText}>{feedback}</Text>
+                        )}
+                    </View>
+                )}
+            </View>
+
+            {/* Bottom overlay - controls */}
+            <View style={styles.bottomOverlay}>
+                <CustomButton
+                    title="Stop Recording"
+                    onPress={() => setShowConfirmation(true)}
+                    variant="primary"
+                    size="large"
+                    style={styles.stopButton}
+                />
+                <TouchableOpacity
+                    onPress={() => setShowModal(true)}
+                    style={styles.cameraToggle}
+                >
+                    <Text style={styles.cameraToggleText}>
+                        Select Camera • {cameraPosition === 'front' ? 'Front' : 'Back'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <ConfirmationModal
@@ -141,136 +154,141 @@ export default function CameraCapture({
 
             {/* Camera selection modal */}
             <Modal transparent visible={showModal} animationType="fade">
-                <View style={styles.modalContainer}>
+                <TouchableOpacity
+                    style={styles.modalContainer}
+                    activeOpacity={1}
+                    onPress={() => setShowModal(false)}
+                >
                     <View style={styles.modalBox}>
                         <Text style={styles.modalTitle}>Select Camera</Text>
                         {(['front', 'back', 'external'] as CameraPosition[]).map((pos) => (
                             <TouchableOpacity
                                 key={pos}
-                                style={styles.modalButton}
+                                style={[
+                                    styles.modalOption,
+                                    cameraPosition === pos && styles.modalOptionActive
+                                ]}
                                 onPress={() => {
                                     setCameraPosition(pos);
                                     setShowModal(false);
                                 }}
                             >
-                                <Text style={styles.modalButtonText}>
-                                    {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                                <Text style={[
+                                    styles.modalOptionText,
+                                    cameraPosition === pos && styles.modalOptionTextActive
+                                ]}>
+                                    {pos.charAt(0).toUpperCase() + pos.slice(1)} Camera
                                 </Text>
                             </TouchableOpacity>
                         ))}
-                        <TouchableOpacity
-                            style={[styles.modalButton, { marginTop: 10 }]}
-                            onPress={() => setShowModal(false)}
-                        >
-                            <Text style={styles.modalButtonText}>Cancel</Text>
-                        </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    overlay: {
-        position: 'absolute',
-        bottom: 60,
-        left: 20,
-        right: 20,
-        alignItems: 'center',
-    },
-    feedback: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#fff',
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        padding: 10,
-        borderRadius: 8,
-        textAlign: 'center',
+    container: {
+        flex: 1,
+        backgroundColor: '#000',
     },
     centered: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
+    },
+    permissionText: {
+        color: '#666',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    topOverlay: {
+        position: 'absolute',
+        top: 60,
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+        zIndex: 1,
+    },
+    emotionContainer: {
+        alignItems: 'center',
+    },
+    emotionText: {
+        fontSize: 18,
+        color: '#fff',
+        fontWeight: '300',
+        marginBottom: 4,
+    },
+    feedbackText: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        fontWeight: '300',
+        maxWidth: 280,
+    },
+    loader: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+    },
+    bottomOverlay: {
+        position: 'absolute',
+        bottom: 40,
+        left: 24,
+        right: 24,
+        alignItems: 'center',
+    },
+    stopButton: {
+        width: '100%',
+        marginBottom: 16,
+    },
+    cameraToggle: {
+        paddingVertical: 12,
+    },
+    cameraToggleText: {
+        fontSize: 15,
+        color: '#999',
+        fontWeight: '300',
     },
     modalContainer: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalBox: {
-        backgroundColor: '#222',
-        padding: 20,
-        borderRadius: 10,
+        backgroundColor: '#0a0a0a',
+        padding: 24,
+        borderRadius: 16,
         width: '80%',
+        maxWidth: 300,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     modalTitle: {
         fontSize: 18,
-        color: '#00FFFF',
-        textAlign: 'center',
-        marginBottom: 12,
-        fontWeight: 'bold',
-    },
-    modalButton: {
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#444',
-    },
-    modalButtonText: {
         color: '#fff',
-        fontSize: 16,
         textAlign: 'center',
+        marginBottom: 24,
+        fontWeight: '300',
     },
-    confirmationContainer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-
-    confirmationBox: {
-        backgroundColor: '#222',
-        padding: 24,
-        borderRadius: 12,
-        width: '80%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 8,
-    },
-
-    confirmationText: {
-        fontSize: 18,
-        color: '#fff',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-
-    confirmationButtonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-
-    confirmationButton: {
-        flex: 1,
-        marginHorizontal: 8,
-        backgroundColor: '#1E90FF',
-        paddingVertical: 10,
+    modalOption: {
+        paddingVertical: 16,
         borderRadius: 8,
-        alignItems: 'center',
+        marginBottom: 8,
     },
-
-    confirmationButtonText: {
-        color: '#fff',
+    modalOptionActive: {
+        backgroundColor: 'rgba(0, 255, 255, 0.1)',
+    },
+    modalOptionText: {
+        color: '#999',
         fontSize: 16,
-        fontWeight: '600',
+        textAlign: 'center',
+        fontWeight: '300',
+    },
+    modalOptionTextActive: {
+        color: '#00FFFF',
     },
 });

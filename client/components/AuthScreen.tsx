@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Keyboard, TouchableWithoutFeedback } from 'react-native';
+import CustomButton from './CustomButton';
 
 interface Props {
     navigation: any;
 }
 
-const API_BASE_URL = 'http://172.16.36.178:3000'; 
+// const API_BASE_URL = 'http://172.16.36.178:3000'; 
+const API_BASE_URL = 'http://10.0.0.163:3000';
 
 export default function AuthScreen({ navigation }: Props) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [djName, setDjName] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
+
+    // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
+    useEffect(() => {
+        const checkToken = async () => {
+            const token = await AsyncStorage.getItem('token');
+            console.log("Token in Auth: ", token)
+        };
+
+        checkToken();
+    });
 
     const handleSubmit = async () => {
         const endpoint = isRegistering ? '/register' : '/login';
@@ -49,69 +62,116 @@ export default function AuthScreen({ navigation }: Props) {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.heading}>{isRegistering ? 'Register' : 'Login'}</Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <Text style={styles.title}>
+                        {isRegistering ? 'Create Account' : 'Welcome Back'}
+                    </Text>
+                    <Text style={styles.subtitle}>
+                        {isRegistering
+                            ? 'Start analyzing your crowd'
+                            : 'Continue where you left off'}
+                    </Text>
 
-            <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-                autoCapitalize="none"
-            />
+                    <View style={styles.form}>
+                        <TextInput
+                            placeholder="Email"
+                            placeholderTextColor="#444"
+                            value={email}
+                            onChangeText={setEmail}
+                            style={styles.input}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                        />
 
-            <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.input}
-            />
+                        <TextInput
+                            placeholder="Password"
+                            placeholderTextColor="#444"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                            style={styles.input}
+                        />
 
-            {isRegistering && (
-                <TextInput
-                    placeholder="DJ Name"
-                    value={djName}
-                    onChangeText={setDjName}
-                    style={styles.input}
-                />
-            )}
+                        {isRegistering && (
+                            <TextInput
+                                placeholder="DJ Name"
+                                placeholderTextColor="#444"
+                                value={djName}
+                                onChangeText={setDjName}
+                                style={styles.input}
+                            />
+                        )}
 
-            <Button title={isRegistering ? 'Register' : 'Login'} onPress={handleSubmit} />
+                        <CustomButton
+                            title={isRegistering ? 'Create Account' : 'Sign In'}
+                            onPress={handleSubmit}
+                            variant="primary"
+                            size="large"
+                            style={styles.button}
+                        />
 
-            <Text
-                style={styles.switchMode}
-                onPress={() => setIsRegistering(!isRegistering)}
-            >
-                {isRegistering ? 'Already have an account? Login' : "Don't have an account? Register"}
-            </Text>
-        </View>
+                        <Text
+                            style={styles.switchText}
+                            onPress={() => setIsRegistering(!isRegistering)}
+                        >
+                            {isRegistering
+                                ? 'Already have an account?'
+                                : 'New to DJ Emotion Analyzer?'}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+        </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 24,
         flex: 1,
+        backgroundColor: '#000',
         justifyContent: 'center',
-        backgroundColor: 'black',
+        paddingHorizontal: 40,
     },
-    heading: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#00FFFF',
-        marginBottom: 24,
-        textAlign: 'center',
+    content: {
+        width: '100%',
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: '300',
+        color: '#fff',
+        marginBottom: 8,
+        letterSpacing: -0.5,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 48,
+        fontWeight: '300',
+    },
+    form: {
+        width: '100%',
     },
     input: {
-        backgroundColor: '#fff',
-        marginBottom: 12,
-        padding: 12,
-        borderRadius: 8,
+        backgroundColor: 'transparent',
+        color: '#fff',
+        marginBottom: 24,
+        paddingVertical: 16,
+        paddingHorizontal: 0,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+        fontSize: 17,
+        fontWeight: '300',
     },
-    switchMode: {
-        color: '#1E90FF',
+    button: {
+        marginTop: 24,
+        marginBottom: 32,
+    },
+    switchText: {
+        color: '#666',
         textAlign: 'center',
-        marginTop: 16,
+        fontSize: 15,
+        fontWeight: '300',
     },
 });

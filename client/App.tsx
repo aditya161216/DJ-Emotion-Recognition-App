@@ -1,12 +1,19 @@
 import { NavigationContainer } from '@react-navigation/native';
 import AuthScreen from "./components/AuthScreen";
 import MainScreen from './components/MainScreen';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
+import SplashScreen from './components/SplashScreen';
+import 'react-native-gesture-handler';
+import { enableScreens } from 'react-native-screens';
 
-const Stack = createNativeStackNavigator();
+
+enableScreens();
+
+const Stack = createStackNavigator();
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -15,11 +22,12 @@ export default function App() {
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem('token');
+      console.log("Token in App: ", token)
       setIsAuthenticated(!!token);
     };
 
     checkToken();
-  }, []);
+  });
 
 
   // show loading screen if not authenticated
@@ -32,12 +40,27 @@ export default function App() {
   }
 
 
-  return(
+  return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+        initialRouteName="Splash"
+      >
+        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen
+          name="Auth"
+          component={AuthScreen}
+          options={{
+            ...TransitionPresets.SlideFromLeftIOS, 
+            gestureDirection: 'vertical', 
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="Main" component={MainScreen} />
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 }

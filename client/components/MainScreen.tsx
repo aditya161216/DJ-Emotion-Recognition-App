@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Button, StyleSheet, Text, Alert } from 'react-native';
+import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import CameraCapture from './CameraCapture';
 import EmotionGraph from './EmotionGraph';
 import WelcomePage from './WelcomePage';
@@ -8,8 +8,17 @@ import DocumentPicker from 'react-native-document-picker';
 import Share from 'react-native-share';
 import ConfirmationModal from './ConfirmationModal';
 import { CameraPosition } from '../types/cameraTypes';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { color } from 'highcharts';
+import CustomButton from './CustomButton';
 
-export default function MainScreen() {
+const API_BASE_URL = 'http://10.0.0.163:3000';
+
+interface Props {
+    navigation: any;
+}
+
+export default function MainScreen({ navigation }: Props) {
     const [isRecording, setIsRecording] = useState(false);
     const [emotionLog, setEmotionLog] = useState<
         { timestamp: number; emotion: string }[]
@@ -22,6 +31,7 @@ export default function MainScreen() {
     const [showRestartModal, setShowRestartModal] = useState(false);
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     const [pendingImport, setPendingImport] = useState(false);
+    const [currentUser, setCurrentUser] = useState("")
 
     useEffect(() => {
         if (pendingImport) {
@@ -35,7 +45,43 @@ export default function MainScreen() {
 
     useEffect(() => {
         console.log('Emotion Log:', emotionLog);
+
     },);
+
+    // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
+    useEffect(() => {
+        const checkToken = async () => {
+            const token = await AsyncStorage.getItem('token');
+            console.log("Token in main: ", token)
+        };
+
+        checkToken();
+    });
+
+    // get the current user data
+    useEffect(() => {
+        const getUserData = async () => {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.warn("No token found");
+                return;
+            }
+
+            const res = await fetch(`${API_BASE_URL}/me`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+            setCurrentUser(data.dj_name);
+            console.log("Current DJ Name:", data.dj_name);
+        };
+
+        getUserData();
+    }, []);
 
 
     const exportEmotionLog = async (log: { timestamp: string | number | Date; emotion: any; }[]) => {
@@ -97,165 +143,297 @@ export default function MainScreen() {
 
     return (
         <>
-            {isWelcomePage ? (
-                <>
-                    <WelcomePage />
-                    <View style={styles.restartButton}>
-                        <Button
-                            title="Start"
+            <View style={{ flex: 1, backgroundColor: 'black' }}>
+                {isWelcomePage ? (
+                    <View style={{ flex: 1, backgroundColor: '#000' }}>
+                        {/* Clean header bar */}
+                        <View style={styles.headerBar}>
+                            <Text style={styles.userInfo}>{currentUser || 'Guest'}</Text>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    await AsyncStorage.removeItem('token');
+                                    navigation.navigate('Auth');
+                                }}
+                                style={styles.logoutButton}
+                            >
+                                <Text style={styles.logoutText}>Logout</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Content area */}
+                        <View style={{ flex: 1, paddingHorizontal: 24 }}>
+                            <WelcomePage />
+                        </View>
+
+                        {/* Action buttons */}
+                        <View style={styles.actionArea}>
+                            <CustomButton
+                                title="Start Recording"
+                                onPress={() => {
+                                    setCameraPosition('back');
+                                    setIsWelcomePage(false);
+                                    setIsRecording(true);
+                                    setLogDate(new Date().toLocaleDateString());
+                                }}
+                                variant="primary"
+                                size="medium"
+                                style={styles.primaryButton}
+                            />
+                            <TouchableOpacity
+                                onPress={importEmotionLog}
+                                style={styles.secondaryAction}
+                            >
+                                <Text style={styles.secondaryActionText}>Import Session</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                ) : (
+                    <View style={{ flex: 1 }}>
+                        {isRecording ? (
+                            <CameraCapture
+                                onComplete={(log) => {
+                                    setEmotionLog(log);
+                                    setIsRecording(false);
+                                    setShowSavePrompt(true);
+                                    setLogDate(new Date().toLocaleDateString());
+                                }}
+                                cameraPosition={cameraPosition}
+                                setCameraPosition={setCameraPosition}
+                            />
+                        ) : (
+                            <>
+
+                                {emotionLog.length > 0 ? (
+                                    <>
+                                        <EmotionGraph data={emotionLog} logDate={logDate} />
+                                    </>
+                                ) : (
+                                    <View style={styles.noDataContainer}>
+                                        <Text style={styles.noDataText}>No data to show.</Text>
+                                        <Text style={styles.noDataSubtext}>
+                                            Start recording to see results!
+                                        </Text>
+                                    </View>
+                                )}
+
+                                {/* <View style={styles.buttonContainer}>
+                                    <View style={styles.actionButtonRow}>
+                                        <CustomButton
+                                            title="Record Again"
+                                            onPress={() => setShowRestartModal(true)}
+                                            variant="primary"
+                                            size="medium"
+                                            // icon="🔄"
+                                            style={styles.actionButton}
+                                        />
+                                        <CustomButton
+                                            title="Back To Welcome"
+                                            onPress={() => setShowWelcomeModal(true)}
+                                            variant="outline"
+                                            size="medium"
+                                            // icon="🏠"
+                                            style={styles.actionButton}
+                                        />
+                                    </View>
+                                    <View style={styles.dataButtonRow}>
+                                        <CustomButton
+                                            title="Export Log"
+                                            onPress={() => exportEmotionLog(emotionLog)}
+                                            variant="outline"
+                                            size="medium"
+                                            // icon="📤"
+                                            style={styles.dataButton}
+                                        />
+                                        <CustomButton
+                                            title="Import Log"
+                                            onPress={() => setShowImportModal(true)}
+                                            variant="outline"
+                                            size="medium"
+                                            // icon="📥"
+                                            style={styles.dataButton}
+                                        />
+                                    </View>
+                                </View> */}
+                                <View style={styles.buttonContainer}>
+                                    <View style={styles.buttonRow}>
+                                        <CustomButton
+                                            title="Record Again"
+                                            onPress={() => setShowRestartModal(true)}
+                                            variant="primary"
+                                            size="medium"
+                                            style={styles.button}
+                                        />
+                                        <CustomButton
+                                            title="Back To Welcome"
+                                            onPress={() => setShowWelcomeModal(true)}
+                                            variant="secondary"
+                                            size="medium"
+                                            style={styles.button}
+                                        />
+                                    </View>
+                                    <View style={styles.buttonRow}>
+                                        <CustomButton
+                                            title="Export Log"
+                                            onPress={() => exportEmotionLog(emotionLog)}
+                                            variant="secondary"
+                                            size="medium"
+                                            style={styles.button}
+                                        />
+                                        <CustomButton
+                                            title="Import Log"
+                                            onPress={() => setShowImportModal(true)}
+                                            variant="secondary"
+                                            size="medium"
+                                            style={styles.button}
+                                        />
+                                    </View>
+                                </View>
+                            </>
+                        )}
+
+                        {emotionLog.length > 0 && <ConfirmationModal
+                            visible={showSavePrompt}
+                            option1Text="Yes"
+                            option2Text="No"
+                            bodyText="Do you want to save this emotion log?"
+                            onPress={async () => {
+                                setShowSavePrompt(false);
+                                await exportEmotionLog(emotionLog);
+                            }}
+                            onCancel={() => setShowSavePrompt(false)}
+                        />}
+
+                        <ConfirmationModal
+                            visible={showImportModal}
+                            option1Text="Proceed"
+                            option2Text="Go Back"
+                            bodyText="WARNING: This will overwrite your current emotion log. Make sure you have saved your current log before importing a new one."
                             onPress={() => {
-                                setCameraPosition('back');
-                                setIsWelcomePage(false);
+                                setShowImportModal(false);
+                                setTimeout(() => {
+                                    setPendingImport(true);
+                                }, 400);
+                            }}
+                            onCancel={() => setShowImportModal(false)}
+                        />
+
+                        <ConfirmationModal
+                            visible={showRestartModal}
+                            option1Text="Yes"
+                            option2Text="No"
+                            bodyText="Are you sure you want to record another set? This will clear the current session."
+                            onPress={() => {
+                                setShowRestartModal(false);
                                 setIsRecording(true);
                                 setLogDate(new Date().toLocaleDateString());
                             }}
+                            onCancel={() => setShowRestartModal(false)}
                         />
-                        <View style={{ marginTop: 12 }}>
-                            <Button
-                                title="Import/View Past Log"
-                                color="#1E90FF"
-                                onPress={importEmotionLog}
-                            />
-                        </View>
-                    </View>
-                </>
-            ) : (
-                <View style={{ flex: 1 }}>
-                    {isRecording ? (
-                        <CameraCapture
-                            onComplete={(log) => {
-                                setEmotionLog(log);
-                                setIsRecording(false);
-                                setShowSavePrompt(true);
-                                setLogDate(new Date().toLocaleDateString());
+
+                        <ConfirmationModal
+                            visible={showWelcomeModal}
+                            option1Text="Yes"
+                            option2Text="No"
+                            bodyText="Are you sure you want to go back to the welcome page? This will clear the current session."
+                            onPress={() => {
+                                setShowWelcomeModal(false);
+                                setIsWelcomePage(true);
                             }}
-                            cameraPosition={cameraPosition}
-                            setCameraPosition={setCameraPosition}
+                            onCancel={() => setShowWelcomeModal(false)}
                         />
-                    ) : (
-                        <>
-                            {emotionLog.length > 0 ? (
-                                <>
-                                    <EmotionGraph data={emotionLog} logDate={logDate} />
-                                </>
-                            ) : (
-                                <View style={styles.noDataContainer}>
-                                    <Text style={styles.noDataText}>No data to show.</Text>
-                                    <Text style={styles.noDataSubtext}>
-                                        Start recording to see results!
-                                    </Text>
-                                </View>
-                            )}
-
-                            <View style={styles.buttonRow}>
-                                <View style={styles.buttonWrapper}>
-                                    <Button
-                                        title="Record Again"
-                                        color="#1E90FF"
-                                        onPress={() => setShowRestartModal(true)}
-                                    />
-                                </View>
-                                <View style={styles.buttonWrapper}>
-                                    <Button
-                                        title="Back To Welcome Page"
-                                        color="#1E90FF"
-                                        onPress={() => setShowWelcomeModal(true)}
-                                    />
-                                </View>
-                            </View>
-                            <View style={styles.importExportRow}>
-                                <View style={styles.buttonWrapper}>
-                                    <Button
-                                        title="Export Log"
-                                        color="#1E90FF"
-                                        onPress={() => exportEmotionLog(emotionLog)}
-                                    />
-                                </View>
-                                <View style={styles.buttonWrapper}>
-                                    <Button
-                                        title="Import Log"
-                                        color="#1E90FF"
-                                        onPress={() => setShowImportModal(true)}
-                                    />
-                                </View>
-                            </View>
-                        </>
-                    )}
-
-                    {emotionLog.length > 0 && <ConfirmationModal
-                        visible={showSavePrompt}
-                        option1Text="Yes"
-                        option2Text="No"
-                        bodyText="Do you want to save this emotion log?"
-                        onPress={async () => {
-                            setShowSavePrompt(false);
-                            await exportEmotionLog(emotionLog);
-                        }}
-                        onCancel={() => setShowSavePrompt(false)}
-                    />}
-
-                    <ConfirmationModal
-                        visible={showImportModal}
-                        option1Text="Proceed"
-                        option2Text="Go Back"
-                        bodyText="WARNING: This will overwrite your current emotion log. Make sure you have saved your current log before importing a new one."
-                        onPress={() => {
-                            setShowImportModal(false);
-                            setTimeout(() => {
-                                setPendingImport(true);
-                            }, 400);
-                        }}
-                        onCancel={() => setShowImportModal(false)}
-                    />
-
-                    <ConfirmationModal
-                        visible={showRestartModal}
-                        option1Text="Yes"
-                        option2Text="No"
-                        bodyText="Are you sure you want to record another set? This will clear the current session."
-                        onPress={() => {
-                            setShowRestartModal(false);
-                            setIsRecording(true);
-                            setLogDate(new Date().toLocaleDateString());
-                        }}
-                        onCancel={() => setShowRestartModal(false)}
-                    />
-
-                    <ConfirmationModal
-                        visible={showWelcomeModal}
-                        option1Text="Yes"
-                        option2Text="No"
-                        bodyText="Are you sure you want to go back to the welcome page? This will clear the current session."
-                        onPress={() => {
-                            setShowWelcomeModal(false);
-                            setIsWelcomePage(true);
-                        }}
-                        onCancel={() => setShowWelcomeModal(false)}
-                    />
-                </View>
-            )}
+                    </View>
+                )}
+            </View>
         </>
     );
 }
 
+
 const styles = StyleSheet.create({
-    buttonRow: {
+    headerBar: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingTop: 50,
+        paddingBottom: 16,
+        backgroundColor: '#000',
+    },
+    userInfo: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '400',
+    },
+    logoutButton: {
+        paddingVertical: 6,
         paddingHorizontal: 16,
-        marginTop: 20,
+    },
+    logoutText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '400',
+    },
+    actionArea: {
+        paddingHorizontal: 24,
+        paddingBottom: 40,
+        paddingTop: 20,
+        backgroundColor: '#000',
+    },
+    primaryButton: {
+        marginBottom: 16,
+    },
+    secondaryAction: {
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    secondaryActionText: {
+        fontSize: 15,
+        color: '#666',
+        fontWeight: '400',
+    },
+    topRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingTop: 10,
         marginBottom: 20,
     },
-    restartButton: {
-        marginTop: 20,
-        marginBottom: 40,
-        alignItems: 'center',
-    },
-    buttonWrapper: {
+    userText: {
+        color: '#00FFFF',
+        fontSize: 14,
+        textAlign: 'right',
         flex: 1,
-        marginHorizontal: 8,
-        borderRadius: 10,
-        overflow: 'hidden',
+        marginLeft: 16,
+    },
+    welcomeButtonsContainer: {
+        paddingBottom: 40,
+        alignItems: 'center',
+        gap: 16,
+    },
+    startButton: {
+        width: '100%',
+    },
+    buttonContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 40,
+        backgroundColor: '#000',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+        gap: 12,
+    },
+    button: {
+        flex: 1,
     },
     noDataContainer: {
         flex: 1,
@@ -274,41 +452,5 @@ const styles = StyleSheet.create({
         color: '#ccc',
         fontSize: 14,
         textAlign: 'center',
-    },
-    saveModal: {
-        position: 'absolute',
-        top: '30%',
-        left: '10%',
-        right: '10%',
-        backgroundColor: '#222',
-        padding: 20,
-        borderRadius: 12,
-        alignItems: 'center',
-        elevation: 5,
-        zIndex: 9999,
-    },
-    savePromptText: {
-        color: '#fff',
-        fontSize: 18,
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    saveButtonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-    },
-    importExportRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        paddingHorizontal: 16,
-        marginBottom: 70,
-    },
-    logDate: {
-        color: '#ccc',
-        fontSize: 14,
-        textAlign: 'center',
-        marginBottom: 8,
-        marginTop: -12,
     },
 });
