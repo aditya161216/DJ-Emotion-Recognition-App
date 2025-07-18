@@ -11,8 +11,13 @@ import { CameraPosition } from '../types/cameraTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { color } from 'highcharts';
 import CustomButton from './CustomButton';
+import {API_BASE_URL} from '@env'
 
-const API_BASE_URL = 'http://10.0.0.163:3000';
+// check for backend url
+if (!API_BASE_URL) {
+    throw new Error("Backend URL missing from env file");
+}
+
 
 interface Props {
     navigation: any;
@@ -43,10 +48,6 @@ export default function MainScreen({ navigation }: Props) {
         }
     }, [pendingImport]);
 
-    useEffect(() => {
-        console.log('Emotion Log:', emotionLog);
-
-    },);
 
     // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
     useEffect(() => {
@@ -81,7 +82,7 @@ export default function MainScreen({ navigation }: Props) {
         };
 
         getUserData();
-    }, []);
+    });
 
 
     const exportEmotionLog = async (log: { timestamp: string | number | Date; emotion: any; }[]) => {

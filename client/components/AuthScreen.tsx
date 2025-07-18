@@ -3,13 +3,17 @@ import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 import CustomButton from './CustomButton';
+import { API_BASE_URL } from '@env'
 
 interface Props {
     navigation: any;
 }
 
-// const API_BASE_URL = 'http://172.16.36.178:3000'; 
-const API_BASE_URL = 'http://10.0.0.163:3000';
+// check for backend url
+if (!API_BASE_URL) {
+    throw new Error("Backend URL missing from env file");
+}
+
 
 export default function AuthScreen({ navigation }: Props) {
     const [email, setEmail] = useState('');

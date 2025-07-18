@@ -11,11 +11,15 @@ import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import ConfirmationModal from './ConfirmationModal';
 import CustomButton from './CustomButton';
+import { API_BASE_URL } from '@env'
 
 type CameraPosition = 'front' | 'back' | 'external';
 
-// const API_BASE_URL = 'http://172.16.36.178:3000'; 
-const API_BASE_URL = 'http://10.0.0.163:3000';
+// check for backend url
+if (!API_BASE_URL) {
+    throw new Error("Backend URL missing from env file");
+}
+
 
 export default function CameraCapture({
     onComplete,

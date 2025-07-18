@@ -10,19 +10,21 @@ from database.models import User
 from database.db import SessionLocal
 import bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
+import os
+from dotenv import load_dotenv
 
 
-# testing both preprocessed and non-preprocessed images
-# num_preprocessed = 0
-# num_non_preprocessed = 0
-# total_images = 0
-# brightness_vals = []
-# contrast_vals = []
-
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
 detector = FER()
-app.config["JWT_SECRET_KEY"] = "your_secret_key"     # change later (PUT IN ENV VARIABLE)
+
+# check for jwt key
+jwt_secret = os.getenv("JWT_SECRET_KEY")
+if not jwt_secret:
+    raise ValueError("Missing JWT_SECRET_KEY in environment")
+
+app.config["JWT_SECRET_KEY"] = jwt_secret
 jwt = JWTManager(app)
 
 @app.route('/me', methods=['GET'])

@@ -1,0 +1,6 @@
+*.env
+.env
+
+
+# ignore local SQLite database file
+users.db
