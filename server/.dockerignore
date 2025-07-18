@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.git/
+.gitignore
+*.db
+.DS_Store
+test_*.py
+*.log
+node_modules/
