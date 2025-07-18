@@ -4,3 +4,7 @@
 
 # ignore local SQLite database file
 users.db
+
+
+__pycache__/
+*.pyc

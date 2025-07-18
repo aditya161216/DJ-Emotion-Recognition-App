@@ -1,9 +1,12 @@
 from sqlalchemy import Column, Integer, String, Enum
 from sqlalchemy.ext.declarative import declarative_base
 import enum
+import os
+from dotenv import load_dotenv
 
 # this is the base class for all the tables
 Base = declarative_base()
+load_dotenv()
 
 class UserType(enum.Enum):
     FREE = "FREE"
