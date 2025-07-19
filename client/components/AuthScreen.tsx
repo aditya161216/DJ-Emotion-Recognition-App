@@ -3,14 +3,14 @@ import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 import CustomButton from './CustomButton';
-import { API_BASE_URL } from '@env'
+import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
 
 interface Props {
     navigation: any;
 }
 
 // check for backend url
-if (!API_BASE_URL) {
+if (!API_PROD_BASE_URL) {
     throw new Error("Backend URL missing from env file");
 }
 
@@ -39,7 +39,7 @@ export default function AuthScreen({ navigation }: Props) {
             : { email, password };
 
         try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            const response = await fetch(`${API_PROD_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -61,6 +61,8 @@ export default function AuthScreen({ navigation }: Props) {
             }
 
         } catch (err: any) {
+            console.error('Connection error:', err);
+            console.log('URL attempted:', `${API_PROD_BASE_URL}${endpoint}`);
             Alert.alert('Error', 'Failed to connect to server.', err);
         }
     };
@@ -112,7 +114,7 @@ export default function AuthScreen({ navigation }: Props) {
                             title={isRegistering ? 'Create Account' : 'Sign In'}
                             onPress={handleSubmit}
                             variant="primary"
-                            size="large"
+                            size="medium"
                             style={styles.button}
                         />
 

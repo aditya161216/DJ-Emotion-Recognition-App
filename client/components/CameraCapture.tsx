@@ -11,12 +11,12 @@ import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import ConfirmationModal from './ConfirmationModal';
 import CustomButton from './CustomButton';
-import { API_BASE_URL } from '@env'
+import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
 
 type CameraPosition = 'front' | 'back' | 'external';
 
 // check for backend url
-if (!API_BASE_URL) {
+if (!API_PROD_BASE_URL) {
     throw new Error("Backend URL missing from env file");
 }
 
@@ -76,7 +76,7 @@ export default function CameraCapture({
             const photo = await cameraRef.current.takePhoto();
             const base64 = await RNFS.readFile(photo.path, 'base64');
 
-            const res = await fetch(`${API_BASE_URL}/analyze-emotion`, {
+            const res = await fetch(`${API_PROD_BASE_URL}/analyze-emotion`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64 }),
@@ -152,7 +152,13 @@ export default function CameraCapture({
                 option1Text="Yes"
                 option2Text="No"
                 bodyText="Are you sure you want to stop recording?"
-                onPress={() => onComplete(emotionLog)}
+                onPress={() => {
+                    setShowConfirmation(false)
+                    setTimeout(() => {
+                        onComplete(emotionLog)
+                    }, 100)
+
+                }}
                 onCancel={() => setShowConfirmation(false)}
             />
 

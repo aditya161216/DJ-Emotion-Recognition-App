@@ -11,10 +11,10 @@ import { CameraPosition } from '../types/cameraTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { color } from 'highcharts';
 import CustomButton from './CustomButton';
-import {API_BASE_URL} from '@env'
+import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
 
 // check for backend url
-if (!API_BASE_URL) {
+if (!API_PROD_BASE_URL) {
     throw new Error("Backend URL missing from env file");
 }
 
@@ -68,7 +68,7 @@ export default function MainScreen({ navigation }: Props) {
                 return;
             }
 
-            const res = await fetch(`${API_BASE_URL}/me`, {
+            const res = await fetch(`${API_PROD_BASE_URL}/me`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -292,17 +292,40 @@ export default function MainScreen({ navigation }: Props) {
                             </>
                         )}
 
-                        {emotionLog.length > 0 && <ConfirmationModal
+                        {/* {emotionLog.length > 0 && <ConfirmationModal
                             visible={showSavePrompt}
                             option1Text="Yes"
                             option2Text="No"
                             bodyText="Do you want to save this emotion log?"
                             onPress={async () => {
                                 setShowSavePrompt(false);
-                                await exportEmotionLog(emotionLog);
+                                setTimeout(async () => {
+                                    await exportEmotionLog(emotionLog);
+                                }, 100)
                             }}
-                            onCancel={() => setShowSavePrompt(false)}
-                        />}
+                            onCancel={() => {
+                                // setTimeout(() => {
+                                //     setShowSavePrompt(false)
+                                // }, 100)
+                                setShowSavePrompt(false)
+                            
+                            }}
+                        />} */}
+                            <ConfirmationModal
+                                visible={showSavePrompt && emotionLog.length > 0}  
+                                option1Text="Yes"
+                                option2Text="No"
+                                bodyText="Do you want to save this emotion log?"
+                                onPress={async () => {
+                                    setShowSavePrompt(false);
+                                    setTimeout(async () => {
+                                        await exportEmotionLog(emotionLog);
+                                    }, 100)
+                                }}
+                                onCancel={() => {
+                                    setShowSavePrompt(false);
+                                }}
+                            />
 
                         <ConfirmationModal
                             visible={showImportModal}
@@ -330,6 +353,8 @@ export default function MainScreen({ navigation }: Props) {
                             }}
                             onCancel={() => setShowRestartModal(false)}
                         />
+
+
 
                         <ConfirmationModal
                             visible={showWelcomeModal}
