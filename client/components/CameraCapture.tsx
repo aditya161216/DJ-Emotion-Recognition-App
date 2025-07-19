@@ -20,13 +20,18 @@ if (!API_PROD_BASE_URL) {
     throw new Error("Backend URL missing from env file");
 }
 
-
 export default function CameraCapture({
     onComplete,
+    showStopModal,
+    onStopPress,
+    onStopCancel,
     cameraPosition,
     setCameraPosition,
 }: {
     onComplete: (log: { timestamp: number; emotion: string }[]) => void;
+    showStopModal: boolean;
+    onStopPress: () => void;
+    onStopCancel: () => void;
     cameraPosition: CameraPosition;
     setCameraPosition: (pos: CameraPosition) => void;
 }) {
@@ -38,7 +43,6 @@ export default function CameraCapture({
         { timestamp: number; emotion: string }[]
     >([]);
     const [showModal, setShowModal] = useState(false);
-    const [showConfirmation, setShowConfirmation] = useState(false);
 
     const cameraRef = useRef<Camera>(null);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -132,7 +136,7 @@ export default function CameraCapture({
             <View style={styles.bottomOverlay}>
                 <CustomButton
                     title="Stop Recording"
-                    onPress={() => setShowConfirmation(true)}
+                    onPress={onStopPress}
                     variant="primary"
                     size="large"
                     style={styles.stopButton}
@@ -148,18 +152,17 @@ export default function CameraCapture({
             </View>
 
             <ConfirmationModal
-                visible={showConfirmation}
+                visible={showStopModal}
                 option1Text="Yes"
                 option2Text="No"
                 bodyText="Are you sure you want to stop recording?"
                 onPress={() => {
-                    setShowConfirmation(false)
+                    onStopCancel();
                     setTimeout(() => {
-                        onComplete(emotionLog)
-                    }, 100)
-
+                        onComplete(emotionLog);
+                    }, 100);
                 }}
-                onCancel={() => setShowConfirmation(false)}
+                onCancel={onStopCancel}
             />
 
             {/* Camera selection modal */}

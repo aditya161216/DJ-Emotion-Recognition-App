@@ -18,25 +18,25 @@ if (!API_PROD_BASE_URL) {
     throw new Error("Backend URL missing from env file");
 }
 
-
 interface Props {
     navigation: any;
 }
+
+type ActiveModal = 'none' | 'save' | 'import' | 'restart' | 'welcome' | 'stopRecording';
 
 export default function MainScreen({ navigation }: Props) {
     const [isRecording, setIsRecording] = useState(false);
     const [emotionLog, setEmotionLog] = useState<
         { timestamp: number; emotion: string }[]
     >([]);
+
     const [logDate, setLogDate] = useState<string | undefined>(undefined);
     const [isWelcomePage, setIsWelcomePage] = useState(true);
     const [cameraPosition, setCameraPosition] = useState<CameraPosition>('back');
-    const [showSavePrompt, setShowSavePrompt] = useState(false);
-    const [showImportModal, setShowImportModal] = useState(false);
-    const [showRestartModal, setShowRestartModal] = useState(false);
-    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+    const [activeModal, setActiveModal] = useState<ActiveModal>('none');
     const [pendingImport, setPendingImport] = useState(false);
     const [currentUser, setCurrentUser] = useState("")
+    const [pendingEmotionLog, setPendingEmotionLog] = useState<{ timestamp: number; emotion: string }[]>([]);
 
     useEffect(() => {
         if (pendingImport) {
@@ -47,7 +47,6 @@ export default function MainScreen({ navigation }: Props) {
             runImport();
         }
     }, [pendingImport]);
-
 
     // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
     useEffect(() => {
@@ -83,7 +82,6 @@ export default function MainScreen({ navigation }: Props) {
 
         getUserData();
     });
-
 
     const exportEmotionLog = async (log: { timestamp: string | number | Date; emotion: any; }[]) => {
         if (log.length === 0) {
@@ -142,6 +140,18 @@ export default function MainScreen({ navigation }: Props) {
         }
     };
 
+    const handleStopRecordingConfirm = (log: { timestamp: number; emotion: string }[]) => {
+        setPendingEmotionLog(log);
+        setActiveModal('none');
+        setTimeout(() => {
+            setEmotionLog(log);
+            setIsRecording(false);
+            setActiveModal('save');
+            setLogDate(new Date().toLocaleDateString());
+        }, 100);
+    };
+
+
     return (
         <>
             <View style={{ flex: 1, backgroundColor: 'black' }}>
@@ -192,18 +202,15 @@ export default function MainScreen({ navigation }: Props) {
                     <View style={{ flex: 1 }}>
                         {isRecording ? (
                             <CameraCapture
-                                onComplete={(log) => {
-                                    setEmotionLog(log);
-                                    setIsRecording(false);
-                                    setShowSavePrompt(true);
-                                    setLogDate(new Date().toLocaleDateString());
-                                }}
+                                onComplete={handleStopRecordingConfirm}
+                                showStopModal={activeModal === 'stopRecording'}
+                                onStopPress={() => setActiveModal('stopRecording')}
+                                onStopCancel={() => setActiveModal('none')}
                                 cameraPosition={cameraPosition}
                                 setCameraPosition={setCameraPosition}
                             />
                         ) : (
                             <>
-
                                 {emotionLog.length > 0 ? (
                                     <>
                                         <EmotionGraph data={emotionLog} logDate={logDate} />
@@ -217,56 +224,18 @@ export default function MainScreen({ navigation }: Props) {
                                     </View>
                                 )}
 
-                                {/* <View style={styles.buttonContainer}>
-                                    <View style={styles.actionButtonRow}>
-                                        <CustomButton
-                                            title="Record Again"
-                                            onPress={() => setShowRestartModal(true)}
-                                            variant="primary"
-                                            size="medium"
-                                            // icon="🔄"
-                                            style={styles.actionButton}
-                                        />
-                                        <CustomButton
-                                            title="Back To Welcome"
-                                            onPress={() => setShowWelcomeModal(true)}
-                                            variant="outline"
-                                            size="medium"
-                                            // icon="🏠"
-                                            style={styles.actionButton}
-                                        />
-                                    </View>
-                                    <View style={styles.dataButtonRow}>
-                                        <CustomButton
-                                            title="Export Log"
-                                            onPress={() => exportEmotionLog(emotionLog)}
-                                            variant="outline"
-                                            size="medium"
-                                            // icon="📤"
-                                            style={styles.dataButton}
-                                        />
-                                        <CustomButton
-                                            title="Import Log"
-                                            onPress={() => setShowImportModal(true)}
-                                            variant="outline"
-                                            size="medium"
-                                            // icon="📥"
-                                            style={styles.dataButton}
-                                        />
-                                    </View>
-                                </View> */}
                                 <View style={styles.buttonContainer}>
                                     <View style={styles.buttonRow}>
                                         <CustomButton
                                             title="Record Again"
-                                            onPress={() => setShowRestartModal(true)}
+                                            onPress={() => setActiveModal('restart')}
                                             variant="primary"
                                             size="medium"
                                             style={styles.button}
                                         />
                                         <CustomButton
                                             title="Back To Welcome"
-                                            onPress={() => setShowWelcomeModal(true)}
+                                            onPress={() => setActiveModal('welcome')}
                                             variant="secondary"
                                             size="medium"
                                             style={styles.button}
@@ -282,7 +251,7 @@ export default function MainScreen({ navigation }: Props) {
                                         />
                                         <CustomButton
                                             title="Import Log"
-                                            onPress={() => setShowImportModal(true)}
+                                            onPress={() => setActiveModal('import')}
                                             variant="secondary"
                                             size="medium"
                                             style={styles.button}
@@ -292,80 +261,63 @@ export default function MainScreen({ navigation }: Props) {
                             </>
                         )}
 
-                        {/* {emotionLog.length > 0 && <ConfirmationModal
-                            visible={showSavePrompt}
+                        <ConfirmationModal
+                            visible={activeModal === 'save' && emotionLog.length > 0}
                             option1Text="Yes"
                             option2Text="No"
                             bodyText="Do you want to save this emotion log?"
                             onPress={async () => {
-                                setShowSavePrompt(false);
+                                setActiveModal('none');
                                 setTimeout(async () => {
                                     await exportEmotionLog(emotionLog);
                                 }, 100)
                             }}
                             onCancel={() => {
-                                // setTimeout(() => {
-                                //     setShowSavePrompt(false)
-                                // }, 100)
-                                setShowSavePrompt(false)
-                            
+                                setActiveModal('none');
                             }}
-                        />} */}
-                            <ConfirmationModal
-                                visible={showSavePrompt && emotionLog.length > 0}  
-                                option1Text="Yes"
-                                option2Text="No"
-                                bodyText="Do you want to save this emotion log?"
-                                onPress={async () => {
-                                    setShowSavePrompt(false);
-                                    setTimeout(async () => {
-                                        await exportEmotionLog(emotionLog);
-                                    }, 100)
-                                }}
-                                onCancel={() => {
-                                    setShowSavePrompt(false);
-                                }}
-                            />
+                        />
 
                         <ConfirmationModal
-                            visible={showImportModal}
+                            visible={activeModal === 'import'}
                             option1Text="Proceed"
                             option2Text="Go Back"
                             bodyText="WARNING: This will overwrite your current emotion log. Make sure you have saved your current log before importing a new one."
                             onPress={() => {
-                                setShowImportModal(false);
+                                setActiveModal('none');
                                 setTimeout(() => {
                                     setPendingImport(true);
                                 }, 400);
                             }}
-                            onCancel={() => setShowImportModal(false)}
+                            onCancel={() => setActiveModal('none')}
                         />
 
                         <ConfirmationModal
-                            visible={showRestartModal}
+                            visible={activeModal === 'restart'}
                             option1Text="Yes"
                             option2Text="No"
                             bodyText="Are you sure you want to record another set? This will clear the current session."
                             onPress={() => {
-                                setShowRestartModal(false);
-                                setIsRecording(true);
-                                setLogDate(new Date().toLocaleDateString());
+                                setActiveModal('none');
+                                setTimeout(() => {
+                                    setIsRecording(true);
+                                    setLogDate(new Date().toLocaleDateString());
+                                }, 100);
                             }}
-                            onCancel={() => setShowRestartModal(false)}
+                            onCancel={() => setActiveModal('none')}
                         />
 
-
-
                         <ConfirmationModal
-                            visible={showWelcomeModal}
+                            visible={activeModal === 'welcome'}
                             option1Text="Yes"
                             option2Text="No"
                             bodyText="Are you sure you want to go back to the welcome page? This will clear the current session."
                             onPress={() => {
-                                setShowWelcomeModal(false);
-                                setIsWelcomePage(true);
+                                setActiveModal('none');
+                                setTimeout(() => {
+                                    setIsWelcomePage(true);
+                                }, 100);
                             }}
-                            onCancel={() => setShowWelcomeModal(false)}
+                            onCancel={() => setActiveModal('none')}
                         />
                     </View>
                 )}
@@ -373,7 +325,6 @@ export default function MainScreen({ navigation }: Props) {
         </>
     );
 }
-
 
 const styles = StyleSheet.create({
     headerBar: {
