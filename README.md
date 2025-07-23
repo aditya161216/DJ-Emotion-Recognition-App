@@ -12,7 +12,7 @@ Displays graphs of crowd emotion trends over time to help DJs reflect and improv
 
 📱 **Cross-Platform**  
 - **iOS (React Native)** 
-- **Andorid (React Native)** 
+- **Android (React Native)** 
 
 🔐 **User Authentication**  
 JWT-based auth system to securely store and retrieve session data.
@@ -23,7 +23,7 @@ JWT-based auth system to securely store and retrieve session data.
 - **Backend:** Flask, Python, OpenCV, `fer`
 - **Auth:** JWT
 - **Database:** PostgreSQL
-- **Hosting:** AWS EC2 for backend, AWS RDS for database
+- **Hosting:** AWS EC2 (backend), AWS RDS (database)
 
 ## How it works
 
@@ -34,7 +34,7 @@ JWT-based auth system to securely store and retrieve session data.
 
 ## Setup (Coming Soon)
 
-🚧 Deployed to App Store, currently in beta testing stage.
+🚧 Currently in beta. App is deployed and undergoing testing ahead of a public App Store release.
 
 ## Screenshots
 
