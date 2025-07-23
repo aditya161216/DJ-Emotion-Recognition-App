@@ -38,7 +38,7 @@ JWT-based auth system to securely store and retrieve session data.
 
 ## Screenshots
 
-> Development build - Currently preparing for App Store deployment.
+> Beta build - Currently undergoing testing.
 <p align="center">
   <img src="https://github.com/user-attachments/assets/08cca286-3e68-41f7-9e84-d281a42c786a" width="250" />
   <img src="https://github.com/user-attachments/assets/e822c040-88d8-4823-9a7f-e8453083a1c1" width="250" />
