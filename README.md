@@ -1,6 +1,6 @@
 # DJ Emotion Recognition App
 
-A cross-platform mobile app for DJs to analyze and visualize **crowd emotions in real-time** during live sets, helping improve song choices and audience engagement.
+A mobile app for DJs to analyze and visualize **crowd emotions in real-time** during live sets, helping improve song choices and audience engagement.
 
 ## Features
 
@@ -12,7 +12,7 @@ Displays graphs of crowd emotion trends over time to help DJs reflect and improv
 
 📱 **Cross-Platform**  
 - **iOS (React Native)** 
-- **Android (React Native)** 
+- **Android (React Native; Coming Soon)** 
 
 🔐 **User Authentication**  
 JWT-based auth system to securely store and retrieve session data.
