@@ -22,8 +22,8 @@ JWT-based auth system to securely store and retrieve session data.
 - **Frontend:** React Native, TypeScript
 - **Backend:** Flask, Python, OpenCV, `fer`
 - **Auth:** JWT
-- **Database:** SQLite3
-- **Hosting:** Currently in development (AWS planned)
+- **Database:** PostgreSQL
+- **Hosting:** AWS EC2 for backend, AWS RDS for database
 
 ## How it works
 
@@ -34,7 +34,7 @@ JWT-based auth system to securely store and retrieve session data.
 
 ## Setup (Coming Soon)
 
-🚧 Deployment and setup instructions will be added once ready.
+🚧 Deployed to App Store, currently in beta testing stage.
 
 ## Screenshots
 
@@ -54,8 +54,8 @@ JWT-based auth system to securely store and retrieve session data.
 ✅ JWT user authentication  
 ✅ Emotion detection pipeline  
 ✅ Data visualization and CSV export  
-🚧 Deployment on AWS  
-🚧 Shazam integration for track logging
+✅ Deployment on AWS  
+🚧 (Future plans) Shazam integration for track logging
 
 ## Why I built this
 
