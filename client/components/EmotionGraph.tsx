@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Platform } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
@@ -37,17 +37,6 @@ export default function EmotionGraph({
         }),
         datasets: [{ data: scores, strokeWidth: 2 }],
     };
-
-    // const chartData = {
-    //     labels: data.map((e, index) => {
-    //         if (index % Math.ceil(data.length / 6) === 0 || index === data.length - 1) {
-    //             const date = new Date(e.timestamp);
-    //             return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-    //         }
-    //         return '';
-    //     }),
-    //     datasets: [{ data: scores, strokeWidth: 2 }],
-    // };
 
     const dynamicWidth = Math.max(screenWidth - 40, data.length * 60);
 
@@ -87,7 +76,11 @@ export default function EmotionGraph({
             {/* Chart */}
             <View style={styles.chartContainer}>
                 {/* Y-axis label */}
-                <Text style={styles.yAxisLabel}>Engagement Level (%)</Text>
+                <View style={styles.yAxisLabelContainer}>
+                    <Text style={styles.yAxisLabel} allowFontScaling={false}>
+                        Engagement Level (%)
+                    </Text>
+                </View>
 
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <LineChart
@@ -169,6 +162,8 @@ export default function EmotionGraph({
     );
 }
 
+// Update the styles in your EmotionGraph component
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -233,23 +228,26 @@ const styles = StyleSheet.create({
     },
     chartContainer: {
         marginBottom: 32,
-        paddingLeft: 17,  // Increased from 24 to make room for Y-axis label
+        paddingLeft: 33,  // Increased to make room for Y-axis label
         position: 'relative',
     },
-
-    yAxisLabel: {
+    yAxisLabelContainer: {
         position: 'absolute',
-        left: -40,  // Adjusted from -50 to ensure it's visible
-        top: 90,   // Center it vertically with the chart
+        left: 7,
+        top: 0,
+        bottom: 0,
+        width: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    yAxisLabel: {
         transform: [{ rotate: '-90deg' }],
-        fontSize: 11,  // Slightly smaller for better fit
+        fontSize: 11,
         color: '#666',
         fontWeight: '300',
-        width: 120,  // Reduced from 150
+        width: 120,
         textAlign: 'center',
-        zIndex: 10,  // Ensure it's above other elements
     },
-
     xAxisLabel: {
         textAlign: 'center',
         fontSize: 12,
@@ -257,6 +255,6 @@ const styles = StyleSheet.create({
         fontWeight: '300',
         marginTop: 8,
         marginRight: 24,
-        paddingLeft: 36,  // Account for the extra left padding
+        paddingLeft: 40,  // Match the chartContainer paddingLeft
     },
 });

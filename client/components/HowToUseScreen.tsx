@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -6,7 +6,8 @@ import {
     ScrollView,
     TouchableOpacity,
     Dimensions,
-    Platform
+    Platform,
+    LayoutChangeEvent
 } from 'react-native';
 import { API_BASE_URL, API_PROD_BASE_URL } from '@env';
 
@@ -154,32 +155,75 @@ const sections: Section[] = [
 export default function HowToUseScreen({ navigation }: Props) {
     const [activeSection, setActiveSection] = useState<string>('getting-started');
     const scrollViewRef = useRef<ScrollView>(null);
+    const navScrollRef = useRef<ScrollView>(null);
+    const sectionRefs = useRef<{ [key: string]: View | null }>({});
+    const sectionPositions = useRef<{ [key: string]: number }>({});
+    const navPillRefs = useRef<{ [key: string]: View | null }>({});
 
+    // Store section positions when they mount
+    const handleSectionLayout = (sectionId: string, event: LayoutChangeEvent) => {
+        const { y } = event.nativeEvent.layout;
+        sectionPositions.current[sectionId] = y;
+    };
+
+    // Scroll to section with accurate position
     const scrollToSection = (sectionId: string) => {
         setActiveSection(sectionId);
-        const sectionIndex = sections.findIndex(s => s.id === sectionId);
-        if (sectionIndex !== -1 && scrollViewRef.current) {
-            // Calculate exact position accounting for accumulated section heights
-            let yPosition = 0;
-            for (let i = 0; i < sectionIndex; i++) {
-                // Approximate height per section based on content
-                yPosition += 350; // Base height
-                const section = sections[i];
-                if (section.content.steps) {
-                    yPosition += section.content.steps.length * 30;
-                }
-                if (section.content.tips) {
-                    yPosition += section.content.tips.length * 30 + 30;
-                }
-                if (section.content.note) {
-                    yPosition += 20;
-                }
-            }
 
+        // Scroll main content to section
+        const yPosition = sectionPositions.current[sectionId];
+        if (yPosition !== undefined && scrollViewRef.current) {
             scrollViewRef.current.scrollTo({
                 y: yPosition,
                 animated: true
             });
+        }
+
+        // Auto-scroll navigation pills to center the active pill
+        if (navPillRefs.current[sectionId] && navScrollRef.current) {
+            navPillRefs.current[sectionId]?.measureLayout(
+                navScrollRef.current as any,
+                (x, y, width, height) => {
+                    // Center the pill in the viewport
+                    const scrollX = x - (Dimensions.get('window').width / 2) + (width / 2);
+                    navScrollRef.current?.scrollTo({
+                        x: Math.max(0, scrollX),
+                        animated: true
+                    });
+                }
+            );
+        }
+    };
+
+    // Track scroll position to update active section
+    const handleScroll = (event: any) => {
+        const scrollY = event.nativeEvent.contentOffset.y;
+
+        // Find which section is currently visible
+        let currentSection = sections[0].id;
+        for (const section of sections) {
+            const sectionY = sectionPositions.current[section.id];
+            if (sectionY !== undefined && scrollY >= sectionY - 100) {
+                currentSection = section.id;
+            }
+        }
+
+        if (currentSection !== activeSection) {
+            setActiveSection(currentSection);
+
+            // Auto-scroll nav to show active pill
+            if (navPillRefs.current[currentSection] && navScrollRef.current) {
+                navPillRefs.current[currentSection]?.measureLayout(
+                    navScrollRef.current as any,
+                    (x, y, width, height) => {
+                        const scrollX = x - (Dimensions.get('window').width / 2) + (width / 2);
+                        navScrollRef.current?.scrollTo({
+                            x: Math.max(0, scrollX),
+                            animated: true
+                        });
+                    }
+                );
+            }
         }
     };
 
@@ -199,6 +243,7 @@ export default function HowToUseScreen({ navigation }: Props) {
 
             {/* Navigation Pills */}
             <ScrollView
+                ref={navScrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.navContainer}
@@ -207,16 +252,24 @@ export default function HowToUseScreen({ navigation }: Props) {
                 {sections.map((section) => (
                     <TouchableOpacity
                         key={section.id}
+                        ref={(ref) => {
+                            if (ref) {
+                                navPillRefs.current[section.id] = ref;
+                            }
+                        }}
                         onPress={() => scrollToSection(section.id)}
                         style={[
                             styles.navPill,
                             activeSection === section.id && styles.navPillActive
                         ]}
                     >
-                        <Text style={[
-                            styles.navText,
-                            activeSection === section.id && styles.navTextActive
-                        ]}>
+                        <Text
+                            style={[
+                                styles.navText,
+                                activeSection === section.id && styles.navTextActive
+                            ]}
+                            allowFontScaling={false}
+                        >
                             {section.title}
                         </Text>
                     </TouchableOpacity>
@@ -229,10 +282,18 @@ export default function HowToUseScreen({ navigation }: Props) {
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
             >
                 {sections.map((section, index) => (
                     <View
                         key={section.id}
+                        ref={(ref) => {
+                            if (ref) {
+                                sectionRefs.current[section.id] = ref;
+                            }
+                        }}
+                        onLayout={(event) => handleSectionLayout(section.id, event)}
                         style={[
                             styles.section,
                             index === sections.length - 1 && styles.lastSection
