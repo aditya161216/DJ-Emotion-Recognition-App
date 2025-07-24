@@ -193,6 +193,10 @@ export default function MainScreen({ navigation }: Props) {
         }, 100);
     };
 
+    const goToHowToScreen = () => {
+        navigation.navigate('HowToUse')
+    }
+
 
     return (
         <>
@@ -223,6 +227,12 @@ export default function MainScreen({ navigation }: Props) {
 
                         {/* Action buttons */}
                         <View style={styles.actionArea}>
+                            <TouchableOpacity
+                                onPress={goToHowToScreen}
+                                style={styles.secondaryAction}
+                            >
+                                <Text style={styles.secondaryActionText}>How To Use</Text>
+                            </TouchableOpacity>
                             <CustomButton
                                 title="Start Recording"
                                 onPress={() => {
@@ -407,6 +417,7 @@ const styles = StyleSheet.create({
     secondaryAction: {
         alignItems: 'center',
         paddingVertical: 12,
+        marginBottom: 8, 
     },
     secondaryActionText: {
         fontSize: 15,

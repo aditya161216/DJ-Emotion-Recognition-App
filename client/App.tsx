@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import AuthScreen from "./components/AuthScreen";
 import MainScreen from './components/MainScreen';
+import HowToUseScreen from './components/HowToUseScreen';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { useEffect, useState } from 'react';
@@ -59,6 +60,7 @@ export default function App() {
           }}
         />
         <Stack.Screen name="Main" component={MainScreen} />
+        <Stack.Screen name="HowToUse" component={HowToUseScreen} />
       </Stack.Navigator>
 
     </NavigationContainer>
