@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { color } from 'highcharts';
 import CustomButton from './CustomButton';
 import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
+import * as Keychain from 'react-native-keychain';
 
 // check for backend url
 if (!API_PROD_BASE_URL) {
@@ -50,9 +51,19 @@ export default function MainScreen({ navigation }: Props) {
 
     // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
     useEffect(() => {
+        // const checkToken = async () => {
+        //     const token = await AsyncStorage.getItem('token');
+        //     console.log("Token in main: ", token)
+        // };
+
         const checkToken = async () => {
-            const token = await AsyncStorage.getItem('token');
-            console.log("Token in main: ", token)
+            try {
+                const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
+                return credentials ? credentials.password : null;
+            } catch (error) {
+                console.error('Keychain error:', error);
+                return null;
+            }
         };
 
         checkToken();
@@ -60,28 +71,59 @@ export default function MainScreen({ navigation }: Props) {
 
     // get the current user data
     useEffect(() => {
+        // const getUserData = async () => {
+        //     const token = await AsyncStorage.getItem('token');
+        //     if (!token) {
+        //         console.warn("No token found");
+        //         return;
+        //     }
+
+        //     const res = await fetch(`${API_PROD_BASE_URL}/me`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Authorization': `Bearer ${token}`,
+        //         },
+        //     });
+
+        //     const data = await res.json();
+        //     setCurrentUser(data.dj_name);
+        //     console.log("Current DJ Name:", data.dj_name);
+        // };
+
         const getUserData = async () => {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                console.warn("No token found");
-                return;
+            try {
+                const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
+                if (!credentials) {
+                    console.warn("No credentials found");
+                    setCurrentUser('Guest');
+                    return;
+                }
+
+                const token = credentials.password; // token is stored as password
+
+                const res = await fetch(`${API_PROD_BASE_URL}/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setCurrentUser(data.dj_name || 'Guest');
+                } else {
+                    setCurrentUser('Guest');
+                }
+            } catch (error) {
+                console.error("Failed to get credentials:", error);
+                setCurrentUser('Guest');
             }
-
-            const res = await fetch(`${API_PROD_BASE_URL}/me`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            const data = await res.json();
-            setCurrentUser(data.dj_name);
-            console.log("Current DJ Name:", data.dj_name);
         };
 
         getUserData();
-    });
+    }, []);
 
     const exportEmotionLog = async (log: { timestamp: string | number | Date; emotion: any; }[]) => {
         if (log.length === 0) {
@@ -162,7 +204,10 @@ export default function MainScreen({ navigation }: Props) {
                             <Text style={styles.userInfo}>{currentUser || 'Guest'}</Text>
                             <TouchableOpacity
                                 onPress={async () => {
-                                    await AsyncStorage.removeItem('token');
+                                    // await AsyncStorage.removeItem('token');
+                                    await Keychain.resetInternetCredentials({
+                                        server: "djemotionanalyzer.com"
+                                    });
                                     navigation.navigate('Auth');
                                 }}
                                 style={styles.logoutButton}

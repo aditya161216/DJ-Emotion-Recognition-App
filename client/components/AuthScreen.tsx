@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 import CustomButton from './CustomButton';
 import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
+import * as Keychain from 'react-native-keychain';
 
 interface Props {
     navigation: any;
@@ -19,7 +20,7 @@ export default function AuthScreen({ navigation }: Props) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [djName, setDjName] = useState('');
-    const [isRegistering, setIsRegistering] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(true);
 
     // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
     useEffect(() => {
@@ -53,7 +54,13 @@ export default function AuthScreen({ navigation }: Props) {
             }
 
             if (!isRegistering && data.access_token) {
-                await AsyncStorage.setItem('token', data.access_token);
+                // await AsyncStorage.setItem('token', data.access_token);
+                await Keychain.setInternetCredentials(
+                    'djemotionanalyzer.com',  // server
+                    email,                // username
+                    data.access_token     // password (token)
+                );
+                console.log("JWT token is already present")
                 navigation.replace('Main'); // take them to MainScreen
             } else if (isRegistering) {
                 Alert.alert('Success', 'Registration successful. You can now log in.');

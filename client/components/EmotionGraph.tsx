@@ -23,16 +23,31 @@ export default function EmotionGraph({
 }) {
     const scores = data.map(e => emotionToScore(e.emotion));
 
+    const startTime = data.length > 0 ? data[0].timestamp : 0;
+
     const chartData = {
         labels: data.map((e, index) => {
             if (index % Math.ceil(data.length / 6) === 0 || index === data.length - 1) {
-                const date = new Date(e.timestamp);
-                return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+                const totalSeconds = index * 2.5;   // each reading 2.5 sec apart
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+                return `${minutes}:${String(seconds).padStart(2, '0')}`;
             }
             return '';
         }),
         datasets: [{ data: scores, strokeWidth: 2 }],
     };
+
+    // const chartData = {
+    //     labels: data.map((e, index) => {
+    //         if (index % Math.ceil(data.length / 6) === 0 || index === data.length - 1) {
+    //             const date = new Date(e.timestamp);
+    //             return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+    //         }
+    //         return '';
+    //     }),
+    //     datasets: [{ data: scores, strokeWidth: 2 }],
+    // };
 
     const dynamicWidth = Math.max(screenWidth - 40, data.length * 60);
 
@@ -47,9 +62,13 @@ export default function EmotionGraph({
     const mostFrequentEmotion = Object.entries(emotionCount).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
     const peakMoment = data[scores.indexOf(Math.max(...scores))];
-    const peakTime = peakMoment
-        ? new Date(peakMoment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : 'N/A';
+    const peakTime = peakMoment ? (() => {
+        const peakIndex = data.indexOf(peakMoment);
+        const totalSeconds = peakIndex * 2.5;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.floor(totalSeconds % 60);
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    })() : 'N/A';
 
     return (
         <ScrollView
@@ -67,6 +86,9 @@ export default function EmotionGraph({
 
             {/* Chart */}
             <View style={styles.chartContainer}>
+                {/* Y-axis label */}
+                <Text style={styles.yAxisLabel}>Engagement Level (%)</Text>
+
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <LineChart
                         data={chartData}
@@ -102,6 +124,9 @@ export default function EmotionGraph({
                         withShadow={false}
                     />
                 </ScrollView>
+
+                {/* X-axis label */}
+                <Text style={styles.xAxisLabel}>Time (minutes:seconds)</Text>
             </View>
 
             {/* Metrics */}
@@ -166,10 +191,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
     },
-    chartContainer: {
-        marginBottom: 32,
-        paddingLeft: 24,
-    },
     chart: {
         marginRight: 24,
     },
@@ -209,5 +230,33 @@ const styles = StyleSheet.create({
         color: '#00FFFF',
         lineHeight: 20,
         textAlign: 'center',
+    },
+    chartContainer: {
+        marginBottom: 32,
+        paddingLeft: 17,  // Increased from 24 to make room for Y-axis label
+        position: 'relative',
+    },
+
+    yAxisLabel: {
+        position: 'absolute',
+        left: -40,  // Adjusted from -50 to ensure it's visible
+        top: 90,   // Center it vertically with the chart
+        transform: [{ rotate: '-90deg' }],
+        fontSize: 11,  // Slightly smaller for better fit
+        color: '#666',
+        fontWeight: '300',
+        width: 120,  // Reduced from 150
+        textAlign: 'center',
+        zIndex: 10,  // Ensure it's above other elements
+    },
+
+    xAxisLabel: {
+        textAlign: 'center',
+        fontSize: 12,
+        color: '#666',
+        fontWeight: '300',
+        marginTop: 8,
+        marginRight: 24,
+        paddingLeft: 36,  // Account for the extra left padding
     },
 });
