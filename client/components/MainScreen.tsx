@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     secondaryAction: {
         alignItems: 'center',
         paddingVertical: 12,
-        marginBottom: 8, 
+        marginBottom: 10, 
     },
     secondaryActionText: {
         fontSize: 15,
