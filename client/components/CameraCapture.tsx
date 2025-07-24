@@ -6,14 +6,12 @@ import {
     ActivityIndicator,
     Modal,
     TouchableOpacity,
-    Alert,
 } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import ConfirmationModal from './ConfirmationModal';
 import CustomButton from './CustomButton';
 import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
-import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 type CameraPosition = 'front' | 'back' | 'external';
 
@@ -37,73 +35,6 @@ export default function CameraCapture({
     cameraPosition: CameraPosition;
     setCameraPosition: (pos: CameraPosition) => void;
 }) {
-    // const [hasPermission, setHasPermission] = useState(false);
-    // const [feedback, setFeedback] = useState('');
-    // const [currentEmotion, setCurrentEmotion] = useState('');
-    // const [loading, setLoading] = useState(false);
-    // const [emotionLog, setEmotionLog] = useState<
-    //     { timestamp: number; emotion: string }[]
-    // >([]);
-    // const [showModal, setShowModal] = useState(false);
-
-    // const cameraRef = useRef<Camera>(null);
-    // const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    // const devices = useCameraDevices();
-    // const device = devices.find((d) => d.position === cameraPosition);
-
-    // useEffect(() => {
-    //     (async () => {
-    //         const status = await Camera.requestCameraPermission();
-    //         setHasPermission(status === 'granted');
-    //     })();
-    // }, []);
-
-    // useEffect(() => {
-    //     if (device && hasPermission && !intervalRef.current) {
-    //         intervalRef.current = setInterval(() => {
-    //             takePhotoAndSend();
-    //         }, 2500);
-    //     }
-
-    //     return () => {
-    //         if (intervalRef.current) {
-    //             clearInterval(intervalRef.current);
-    //             intervalRef.current = null;
-    //         }
-    //     };
-    // }, [device, hasPermission]);
-
-    // const takePhotoAndSend = async () => {
-    //     if (!cameraRef.current) return;
-    //     try {
-    //         setLoading(true);
-
-    //         const photo = await cameraRef.current.takePhoto();
-    //         const base64 = await RNFS.readFile(photo.path, 'base64');
-
-    //         const res = await fetch(`${API_PROD_BASE_URL}/analyze-emotion`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({ image: base64 }),
-    //         });
-
-    //         const json = await res.json();
-    //         const emotion = json.emotion || 'None';
-    //         setEmotionLog((prev) => [
-    //             ...prev,
-    //             { timestamp: Date.now(), emotion },
-    //         ]);
-    //         setCurrentEmotion(emotion);
-    //         setFeedback(json.feedback || '');
-    //     } catch (err) {
-    //         console.error('Capture error:', err);
-    //         setCurrentEmotion('Error');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     const [hasPermission, setHasPermission] = useState(false);
     const [feedback, setFeedback] = useState('');
     const [currentEmotion, setCurrentEmotion] = useState('');
@@ -112,7 +43,6 @@ export default function CameraCapture({
         { timestamp: number; emotion: string }[]
     >([]);
     const [showModal, setShowModal] = useState(false);
-    const [isRecordingVideo, setIsRecordingVideo] = useState(false);
 
     const cameraRef = useRef<Camera>(null);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -122,20 +52,13 @@ export default function CameraCapture({
 
     useEffect(() => {
         (async () => {
-            const cameraStatus = await Camera.requestCameraPermission();
-            const microphoneStatus = await Camera.requestMicrophonePermission();
-            setHasPermission(cameraStatus === 'granted' && microphoneStatus === 'granted');
+            const status = await Camera.requestCameraPermission();
+            setHasPermission(status === 'granted');
         })();
     }, []);
 
     useEffect(() => {
         if (device && hasPermission && !intervalRef.current) {
-            // Start video recording when component mounts
-            setTimeout(() => {
-                startVideoRecording();
-            }, 1000);
-
-            // Continue with photo intervals for emotion detection
             intervalRef.current = setInterval(() => {
                 takePhotoAndSend();
             }, 2500);
@@ -149,56 +72,13 @@ export default function CameraCapture({
         };
     }, [device, hasPermission]);
 
-    const startVideoRecording = async () => {
-        if (!cameraRef.current || isRecordingVideo) return;
-
-        try {
-            await cameraRef.current.startRecording({
-                onRecordingFinished: async (video) => {
-                    console.log('Video saved to:', video.path);
-                    // Save to camera roll
-                    try {
-                        await CameraRoll.saveAsset(video.path, { type: 'video' });
-                        // Remove the Alert or make it appear after navigation
-                        console.log('Recording saved to camera roll!');
-                    } catch (error) {
-                        console.error('Failed to save video:', error);
-                    }
-                },
-                onRecordingError: (error) => {
-                    console.error('Recording error:', error);
-                },
-            });
-            setIsRecordingVideo(true);
-        } catch (error) {
-            console.error('Failed to start recording:', error);
-        }
-    };
-
-    const stopVideoRecording = async () => {
-        if (!cameraRef.current || !isRecordingVideo) return;
-
-        try {
-            await cameraRef.current.stopRecording();
-            setIsRecordingVideo(false);
-        } catch (error) {
-            console.error('Failed to stop recording:', error);
-        }
-    };
-
-
     const takePhotoAndSend = async () => {
-        if (!cameraRef.current || !isRecordingVideo) return;
-
+        if (!cameraRef.current) return;
         try {
             setLoading(true);
-            // Take snapshot during video recording
-            const snapshot = await cameraRef.current.takeSnapshot({
-                quality: 85,
-                // skipMetadata: true,
-            });
 
-            const base64 = await RNFS.readFile(snapshot.path, 'base64');
+            const photo = await cameraRef.current.takePhoto();
+            const base64 = await RNFS.readFile(photo.path, 'base64');
 
             const res = await fetch(`${API_PROD_BASE_URL}/analyze-emotion`, {
                 method: 'POST',
@@ -214,28 +94,11 @@ export default function CameraCapture({
             ]);
             setCurrentEmotion(emotion);
             setFeedback(json.feedback || '');
-
-            // Clean up snapshot file
-            await RNFS.unlink(snapshot.path);
         } catch (err) {
             console.error('Capture error:', err);
             setCurrentEmotion('Error');
         } finally {
             setLoading(false);
-        }
-    };
-
-    // Update the stop recording handler
-    const handleStopRecording = async () => {
-        // First stop the recording and wait for it to complete
-        if (isRecordingVideo) {
-            await stopVideoRecording();
-            // Add a delay to ensure video is saved
-            setTimeout(() => {
-                onStopPress();
-            }, 1000);
-        } else {
-            onStopPress();
         }
     };
 
@@ -248,20 +111,10 @@ export default function CameraCapture({
                     device={device}
                     isActive={true}
                     photo={true}
-                    video={true}
-                    audio={true}
                 />
             ) : (
                 <View style={styles.centered}>
                     <Text style={styles.permissionText}>Waiting for camera permission...</Text>
-                </View>
-            )}
-
-            {/* Recording indicator */}
-            {isRecordingVideo && (
-                <View style={styles.recordingIndicator}>
-                    <View style={styles.recordingDot} />
-                    <Text style={styles.recordingText}>REC</Text>
                 </View>
             )}
 
@@ -283,7 +136,7 @@ export default function CameraCapture({
             <View style={styles.bottomOverlay}>
                 <CustomButton
                     title="Stop Recording"
-                    onPress={handleStopRecording}
+                    onPress={onStopPress}
                     variant="primary"
                     size="large"
                     style={styles.stopButton}
@@ -303,22 +156,11 @@ export default function CameraCapture({
                 option1Text="Yes"
                 option2Text="No"
                 bodyText="Are you sure you want to stop recording?"
-                onPress={async () => {
-                    if (isRecordingVideo) {
-                        await stopVideoRecording();
-                        // Wait for video to save
-                        setTimeout(() => {
-                            onStopCancel();
-                            setTimeout(() => {
-                                onComplete(emotionLog);
-                            }, 500);
-                        }, 1500);
-                    } else {
-                        onStopCancel();
-                        setTimeout(() => {
-                            onComplete(emotionLog);
-                        }, 100);
-                    }
+                onPress={() => {
+                    onStopCancel();
+                    setTimeout(() => {
+                        onComplete(emotionLog);
+                    }, 100);
                 }}
                 onCancel={onStopCancel}
             />
@@ -461,28 +303,5 @@ const styles = StyleSheet.create({
     },
     modalOptionTextActive: {
         color: '#00FFFF',
-    },
-    recordingIndicator: {
-        position: 'absolute',
-        top: 100,
-        right: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 0, 0, 0.8)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-    },
-    recordingDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#fff',
-        marginRight: 6,
-    },
-    recordingText: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: '600',
     },
 });
