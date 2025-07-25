@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import ConfirmationModal from './ConfirmationModal';
 import CustomButton from './CustomButton';
 import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
@@ -43,6 +44,7 @@ export default function CameraCapture({
         { timestamp: number; emotion: string }[]
     >([]);
     const [showModal, setShowModal] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
 
     const cameraRef = useRef<Camera>(null);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -52,13 +54,26 @@ export default function CameraCapture({
 
     useEffect(() => {
         (async () => {
-            const status = await Camera.requestCameraPermission();
-            setHasPermission(status === 'granted');
+            const cameraStatus = await Camera.requestCameraPermission();
+            const micStatus = await Camera.requestMicrophonePermission();
+            setHasPermission(cameraStatus === 'granted' && micStatus === 'granted');
         })();
     }, []);
 
+    // Start video recording after camera is ready
     useEffect(() => {
-        if (device && hasPermission && !intervalRef.current) {
+        if (device && hasPermission && cameraRef.current && !isRecording) {
+            // Small delay to ensure camera is fully initialized
+            const timer = setTimeout(() => {
+                startVideoRecording();
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [device, hasPermission]);
+
+    // Start photo interval after recording starts
+    useEffect(() => {
+        if (isRecording && device && hasPermission && !intervalRef.current) {
             intervalRef.current = setInterval(() => {
                 takePhotoAndSend();
             }, 2500);
@@ -70,10 +85,53 @@ export default function CameraCapture({
                 intervalRef.current = null;
             }
         };
-    }, [device, hasPermission]);
+    }, [isRecording, device, hasPermission]);
+
+    const startVideoRecording = async () => {
+        if (!cameraRef.current || isRecording) return;
+
+        try {
+            console.log("Starting video recording...");
+            await cameraRef.current.startRecording({
+                onRecordingFinished: async (video) => {
+                    console.log('Recording finished:', video);
+                    try {
+                        const videoPath = video.path.startsWith('file://')
+                            ? video.path
+                            : `file://${video.path}`;
+                        await CameraRoll.save(videoPath, { type: 'video' });
+                        console.log('Video saved to camera roll');
+                    } catch (error) {
+                        console.error('Failed to save video:', error);
+                    }
+                },
+                onRecordingError: (error) => {
+                    console.error('Recording error:', error);
+                    setIsRecording(false);
+                },
+            });
+            setIsRecording(true);
+            console.log("Video recording started");
+        } catch (error) {
+            console.error('Failed to start recording:', error);
+        }
+    };
+
+    const stopVideoRecording = async () => {
+        if (!cameraRef.current || !isRecording) return;
+
+        console.log("Stopping video recording...");
+        try {
+            await cameraRef.current.stopRecording();
+            setIsRecording(false);
+            console.log("Video recording stopped");
+        } catch (err) {
+            console.error("Error stopping recording:", err);
+        }
+    };
 
     const takePhotoAndSend = async () => {
-        if (!cameraRef.current) return;
+        if (!cameraRef.current || !isRecording) return;
         try {
             setLoading(true);
 
@@ -94,12 +152,20 @@ export default function CameraCapture({
             ]);
             setCurrentEmotion(emotion);
             setFeedback(json.feedback || '');
+
+            // Clean up photo file
+            await RNFS.unlink(photo.path);
         } catch (err) {
             console.error('Capture error:', err);
             setCurrentEmotion('Error');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleStopPress = async () => {
+        await stopVideoRecording();
+        onStopPress(); // This triggers the modal
     };
 
     return (
@@ -111,10 +177,22 @@ export default function CameraCapture({
                     device={device}
                     isActive={true}
                     photo={true}
+                    video={true}
+                    audio={true}
                 />
             ) : (
                 <View style={styles.centered}>
-                    <Text style={styles.permissionText}>Waiting for camera permission...</Text>
+                    <Text style={styles.permissionText}>
+                        Waiting for camera and microphone permissions...
+                    </Text>
+                </View>
+            )}
+
+            {/* Recording indicator */}
+            {isRecording && (
+                <View style={styles.recordingIndicator}>
+                    <View style={styles.recordingDot} />
+                    <Text style={styles.recordingText}>REC</Text>
                 </View>
             )}
 
@@ -136,7 +214,7 @@ export default function CameraCapture({
             <View style={styles.bottomOverlay}>
                 <CustomButton
                     title="Stop Recording"
-                    onPress={onStopPress}
+                    onPress={handleStopPress}
                     variant="primary"
                     size="large"
                     style={styles.stopButton}
@@ -216,6 +294,29 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 16,
         textAlign: 'center',
+    },
+    recordingIndicator: {
+        position: 'absolute',
+        top: 60,
+        right: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    recordingDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#FF0000',
+        marginRight: 6,
+    },
+    recordingText: {
+        color: '#FF0000',
+        fontSize: 12,
+        fontWeight: '600',
     },
     topOverlay: {
         position: 'absolute',
