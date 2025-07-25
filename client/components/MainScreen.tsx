@@ -216,7 +216,7 @@ export default function MainScreen({ navigation }: Props) {
                                 }}
                                 style={styles.logoutButton}
                             >
-                                <Text style={styles.logoutText}>Logout</Text>
+                                <Text style={styles.logoutText}>Sign Out</Text>
                             </TouchableOpacity>
                         </View>
 
