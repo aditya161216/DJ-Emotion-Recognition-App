@@ -139,7 +139,7 @@ const sections: Section[] = [
         title: 'Pro Tips',
         icon: '',
         content: {
-            subtitle: 'Get the most out of DJ Emotion Analyzer',
+            subtitle: 'Get the most out of CrowdControl',
             tips: [
                 'Ensure proper lighting conditions to get the most accurate data',
                 'Record during peak hours for more diverse emotion data',

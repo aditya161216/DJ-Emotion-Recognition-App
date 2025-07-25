@@ -131,7 +131,7 @@ export default function AuthScreen({ navigation }: Props) {
                         >
                             {isRegistering
                                 ? 'Already have an account?'
-                                : 'New to DJ Emotion Analyzer?'}
+                                : 'New to CrowdControl?'}
                         </Text>
                     </View>
                 </View>

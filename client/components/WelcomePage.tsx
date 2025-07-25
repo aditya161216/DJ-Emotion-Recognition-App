@@ -11,7 +11,7 @@ export default function WelcomePage() {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>DJ Emotion Analyzer</Text>
+                <Text style={styles.title}>CrowdControl</Text>
                 <Text style={styles.subtitle}>Understand your crowd in real-time</Text>
 
                 <View style={styles.features}>

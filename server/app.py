@@ -68,6 +68,10 @@ def register():
 
         users_with_email = session.query(User).filter_by(email=email).first()
 
+        if not (email and password and dj_name):
+            return jsonify({'message': 'Please fill out all required fields.'}), 400
+
+
         if users_with_email:
             return jsonify({'message': 'An account with this email already exists. Please log in or use a different email.'}), 409
 
@@ -104,6 +108,9 @@ def login():
 
     users_with_email = session.query(User).filter_by(email=user_email).all()
 
+    if not (user_email and user_password):
+            return jsonify({'message': 'Please fill out all required fields.'}), 400
+
     if not users_with_email:
         return jsonify({'message': 'User not found'}), 404
     
@@ -112,78 +119,7 @@ def login():
     
     access_token = create_access_token(identity=users_with_email[0].email)
     return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
-    
 
-# @app.route('/analyze-emotion', methods=['POST'])
-# def analyze_emotion():
-#     global num_preprocessed, num_non_preprocessed, total_images, brightness_vals, contrast_vals
-
-#     data = request.json
-#     image_b64 = data.get('image')
-
-#     if not image_b64:
-#         return jsonify({'error': 'No image provided'}), 400
-
-#     try:
-#         img_bytes = base64.b64decode(image_b64)
-#         nparr = np.frombuffer(img_bytes, np.uint8)
-#         original_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-#         # Preprocess image + get metrics
-#         preprocessed_frame, brightness, contrast = analyze_and_preprocess(original_frame)
-#         brightness_vals.append(brightness)
-#         contrast_vals.append(contrast)
-
-#         # Convert both to RGB
-#         rgb_original = cv2.cvtColor(original_frame, cv2.COLOR_BGR2RGB)
-#         rgb_preprocessed = cv2.cvtColor(preprocessed_frame, cv2.COLOR_BGR2RGB)
-
-#         # Detect emotions
-#         emotions_raw = detector.detect_emotions(rgb_original)
-#         emotions_proc = detector.detect_emotions(rgb_preprocessed)
-
-#         top_raw = [max(e["emotions"], key=e["emotions"].get) for e in emotions_raw]
-#         top_proc = [max(e["emotions"], key=e["emotions"].get) for e in emotions_proc]
-
-#         overall_raw = Counter(top_raw).most_common(1)[0][0] if top_raw else 'none'
-#         overall_proc = Counter(top_proc).most_common(1)[0][0] if top_proc else 'none'
-
-#         # Track success
-#         total_images += 1
-#         if overall_raw != 'none':
-#             num_non_preprocessed += 1
-#         if overall_proc != 'none':
-#             num_preprocessed += 1
-
-#         # Logging
-#         print(f"[{brightness:.1f} | {contrast:.1f}] Raw: {overall_raw.upper()}, Preprocessed: {overall_proc.upper()}")
-
-#         # Print summary every 50 frames
-#         if total_images % 50 == 0:
-#             avg_brightness = sum(brightness_vals) / len(brightness_vals)
-#             avg_contrast = sum(contrast_vals) / len(contrast_vals)
-#             print("\n--- SUMMARY ---")
-#             print(f"Frames: {total_images}")
-#             print(f"Avg Brightness: {avg_brightness:.2f}")
-#             print(f"Avg Contrast: {avg_contrast:.2f}")
-#             print(f"Raw Success: {num_non_preprocessed} ({(num_non_preprocessed / total_images) * 100:.1f}%)")
-#             print(f"Preprocessed Success: {num_preprocessed} ({(num_preprocessed / total_images) * 100:.1f}%)")
-#             print("---------------\n")
-
-#         feedback_proc = (
-#             "The crowd is loving it your music - keep it up!"
-#             if overall_proc in ['happy', 'surprise']
-#             else "The crowd is not very engaged. Consider playing a more upbeat song."
-#         )
-
-#     except Exception as e:
-#         return jsonify({'error': f'Processing failed: {str(e)}'}), 400
-
-#     return jsonify({
-#         'raw_emotion': overall_raw,
-#         'processed_emotion': overall_proc,
-#         'feedback': feedback_proc
-#     })
 
 @app.route('/analyze-emotion', methods=['POST'])
 def analyze_emotion():
