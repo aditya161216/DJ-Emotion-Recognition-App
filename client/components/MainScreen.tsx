@@ -395,10 +395,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
         fontWeight: '400',
+        flex: 1,  // Add this to prevent text cutoff
+        marginRight: 10,  // Add spacing between username and button
     },
     logoutButton: {
         paddingVertical: 6,
-        paddingHorizontal: 16,
+        paddingHorizontal: 0,  // Remove horizontal padding for better alignment
     },
     logoutText: {
         fontSize: 14,
@@ -412,12 +414,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     primaryButton: {
-        marginBottom: 16,
+        marginVertical: 20,  // Changed from marginBottom to add space above and below
     },
     secondaryAction: {
         alignItems: 'center',
         paddingVertical: 12,
-        marginBottom: 10, 
+        // Removed marginBottom to let container handle spacing
     },
     secondaryActionText: {
         fontSize: 15,

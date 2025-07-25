@@ -164,7 +164,7 @@ export default function EmotionGraph({
                     <View style={styles.scatterChart}>
                         {/* Y-axis label - rotated */}
                         <View style={styles.scatterYLabelContainer}>
-                            <Text style={styles.scatterYLabelRotated}>Engagement %</Text>
+                            <Text style={styles.scatterYLabelRotated}>Engagement (%)</Text>
                         </View>
 
                         {/* Y-axis labels */}
@@ -257,7 +257,7 @@ export default function EmotionGraph({
                     {/* Y-axis label */}
                     <View style={styles.yAxisLabelContainer}>
                         <Text style={styles.yAxisLabel} allowFontScaling={false}>
-                            Engagement Level (%)
+                            Engagement (%)
                         </Text>
                     </View>
 
