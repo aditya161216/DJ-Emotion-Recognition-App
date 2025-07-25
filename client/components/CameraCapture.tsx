@@ -54,9 +54,35 @@ export default function CameraCapture({
 
     useEffect(() => {
         (async () => {
+            // Request camera and microphone permissions
             const cameraStatus = await Camera.requestCameraPermission();
             const micStatus = await Camera.requestMicrophonePermission();
-            setHasPermission(cameraStatus === 'granted' && micStatus === 'granted');
+
+            // Force photo library permission request on iOS
+            let photoLibraryGranted = false;
+            try {
+                // This will trigger the permission dialog on iOS if not already granted
+                await CameraRoll.getPhotos({
+                    first: 1,
+                    assetType: 'Videos',
+                });
+                photoLibraryGranted = true;
+            } catch (error:any) {
+                console.log('Photo library permission denied or error:', error);
+                // If error contains "access", it's likely a permission issue
+                if (error.includes('access')) {
+                    photoLibraryGranted = false;
+                } else {
+                    // Other errors might just mean no photos, which is fine
+                    photoLibraryGranted = true;
+                }
+            }
+
+            setHasPermission(
+                cameraStatus === 'granted' &&
+                micStatus === 'granted' &&
+                photoLibraryGranted
+            );
         })();
     }, []);
 
@@ -183,7 +209,7 @@ export default function CameraCapture({
             ) : (
                 <View style={styles.centered}>
                     <Text style={styles.permissionText}>
-                        Waiting for camera and microphone permissions...
+                        Waiting for camera, microphone, and photo library permissions...
                     </Text>
                 </View>
             )}
@@ -294,6 +320,8 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 16,
         textAlign: 'center',
+        paddingHorizontal: 40,
+        lineHeight: 22,
     },
     recordingIndicator: {
         position: 'absolute',

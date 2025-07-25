@@ -289,7 +289,7 @@ export default function MainScreen({ navigation }: Props) {
                                             style={styles.button}
                                         />
                                         <CustomButton
-                                            title="Back To Welcome"
+                                            title="Back To Home"
                                             onPress={() => setActiveModal('welcome')}
                                             variant="secondary"
                                             size="medium"
@@ -365,7 +365,7 @@ export default function MainScreen({ navigation }: Props) {
                             visible={activeModal === 'welcome'}
                             option1Text="Yes"
                             option2Text="No"
-                            bodyText="Are you sure you want to go back to the welcome page? This will clear the current session."
+                            bodyText="Are you sure you want to go back to the home page? This will clear the current session."
                             onPress={() => {
                                 setActiveModal('none');
                                 setTimeout(() => {
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingTop: 50,
+        paddingTop: 57,
         paddingBottom: 16,
         backgroundColor: '#000',
     },
@@ -419,6 +419,7 @@ const styles = StyleSheet.create({
     secondaryAction: {
         alignItems: 'center',
         paddingVertical: 12,
+        // paddingBottom: -5
         // Removed marginBottom to let container handle spacing
     },
     secondaryActionText: {

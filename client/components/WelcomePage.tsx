@@ -11,8 +11,8 @@ export default function WelcomePage() {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>CrowdControl</Text>
-                <Text style={styles.subtitle}>Understand your crowd in real-time</Text>
+                <Text style={styles.title}>GrooveGauge</Text>
+                <Text style={styles.subtitle}>Gauge your crowd in real-time</Text>
 
                 <View style={styles.features}>
                     {features.map((text, index) => (

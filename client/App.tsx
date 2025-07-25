@@ -10,6 +10,7 @@ import { ActivityIndicator, View } from 'react-native';
 import SplashScreen from './components/SplashScreen';
 import 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
+import * as Keychain from 'react-native-keychain';
 
 
 enableScreens();
@@ -20,11 +21,26 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
+  // useEffect(() => {
+  //   const checkToken = async () => {
+  //     const token = await AsyncStorage.getItem('token');
+  //     console.log("Token in App: ", token)
+  //     setIsAuthenticated(!!token);
+  //   };
+
+  //   checkToken();
+  // });
+
   useEffect(() => {
     const checkToken = async () => {
-      const token = await AsyncStorage.getItem('token');
-      console.log("Token in App: ", token)
-      setIsAuthenticated(!!token);
+      try {
+        const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
+        console.log("Token in App: ", credentials ? 'Token exists' : 'No token');
+        setIsAuthenticated(!!credentials);
+      } catch (error) {
+        console.error('Keychain error:', error);
+        setIsAuthenticated(false);
+      }
     };
 
     checkToken();

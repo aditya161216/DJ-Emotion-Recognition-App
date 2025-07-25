@@ -49,7 +49,7 @@ const sections: Section[] = [
             ],
             tips: [
                 'Use a phone stand or tripod for stable recording',
-                'Ensure good lighting on the crowd for better emotion detection'
+                'Ensure good lighting on the crowd for emotion detection'
             ]
         }
     },
@@ -82,7 +82,7 @@ const sections: Section[] = [
                 'Tap "Select Camera" to switch between front/back cameras',
                 'Use back camera to capture crowd emotions',
                 'Use front camera to record yourself while performing',
-                'External camera option available for professional setups'
+                'External camera option available for professional setups [COMING SOON]'
             ]
         }
     },
@@ -98,7 +98,7 @@ const sections: Section[] = [
                 'Video is automatically saved to your camera roll',
                 'Emotion analysis results are displayed in a graph'
             ],
-            note: 'Make sure to wait for "Saving video..." to complete'
+            
         }
     },
     {
@@ -108,14 +108,17 @@ const sections: Section[] = [
         content: {
             subtitle: 'Interpret your emotion tracking data',
             steps: [
-                'View the emotion timeline graph showing crowd reactions over time',
-                'See which emotions dominated during different parts of your set',
-                'Identify peaks and valleys in crowd engagement',
-                'Use insights to improve future performances'
+                'Toggle between Engagement and Emotion views using the switcher',
+                'Engagement graph shows overall crowd energy levels (0-100%)',
+                'Emotion scatter plot displays specific emotions mapped over time and energy',
+                'Identify patterns between emotions and engagement levels',
+                'Track how different emotions correlate with crowd energy'
             ],
             tips: [
-                'Happy and Surprised emotions often indicate high energy moments',
-                'Neutral might suggest crowd is focused or waiting for a drop'
+                'In Engagement view: Look for peaks (high energy moments) and valleys (low energy)',
+                'In Emotion view: Colors show different emotions - notice clusters and transitions',
+                'Happy emotions at high engagement = peak crowd moments',
+                'Multiple emotions at varying levels might indicate a diverse crowd response'
             ]
         }
     },
@@ -126,12 +129,12 @@ const sections: Section[] = [
         content: {
             subtitle: 'Save and share your performance data',
             steps: [
-                'Export Log: Save emotion data as CSV file',
-                'Import Log: Load previously saved sessions',
+                'Export Log: Save emotion data as a CSV file to Files app',
+                'Import Log: Load previously saved sessions from Files',
                 'Share files via email, cloud storage, or messaging apps',
                 'Compare different performances by importing past sessions'
             ],
-            note: 'Exported files include timestamps and detected emotions'
+            note: 'Exported files include timestamps and detected emotions. Files are saved locally and can be accessed anytime through the Files app.'
         }
     },
     {
@@ -139,9 +142,9 @@ const sections: Section[] = [
         title: 'Pro Tips',
         icon: '',
         content: {
-            subtitle: 'Get the most out of CrowdControl',
+            subtitle: 'Get the most out of GrooveGauge',
             tips: [
-                'Ensure proper lighting conditions to get the most accurate data',
+                'Ensure proper lighting conditions to get accurate data',
                 'Record during peak hours for more diverse emotion data',
                 'Test different music styles and observe crowd reactions',
                 'Keep your device plugged in for longer sets',
