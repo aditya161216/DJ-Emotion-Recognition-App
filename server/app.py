@@ -66,6 +66,11 @@ def register():
         dj_name = data.get('dj_name')
         user_type = data.get('user_type')
 
+        users_with_email = session.query(User).filter_by(email=email).first()
+
+        if users_with_email:
+            return jsonify({'message': 'An account with this email already exists. Please log in or use a different email.'}), 409
+
         # hash the password for security
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         hashed_password_str = hashed_password.decode('utf-8')  # store as string in DB
@@ -82,7 +87,7 @@ def register():
     
     except Exception as e:
         session.rollback()
-        return jsonify({'message': f'Error registering user: {str(e)}'}), 500
+        return jsonify({'message': f'Error registering user.'}), 500
     finally:
         session.close()
 
