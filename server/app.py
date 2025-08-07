@@ -12,6 +12,7 @@ import bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 import os
 from dotenv import load_dotenv
+import re
 
 
 load_dotenv()
