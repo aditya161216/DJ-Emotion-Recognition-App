@@ -27,6 +27,39 @@ if not jwt_secret:
 app.config["JWT_SECRET_KEY"] = jwt_secret
 jwt = JWTManager(app)
 
+# determines if user has entered a valid email
+def is_valid_email(email):
+    """
+    Validate email format using regex pattern.
+    Returns True if email is valid, False otherwise.
+    """
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    
+    if not email:
+        return False
+    
+    # Additional checks
+    if len(email) > 254:  # Maximum email length per RFC 5321
+        return False
+    
+    # Check basic pattern
+    if not re.match(email_pattern, email):
+        return False
+    
+    # Check for consecutive dots
+    if '..' in email:
+        return False
+    
+    # Check if email starts or ends with a dot
+    if email.startswith('.') or email.endswith('.'):
+        return False
+    
+    # Check if @ is at the beginning or end
+    if email.startswith('@') or email.endswith('@'):
+        return False
+    
+    return True
+
 @app.route('/me', methods=['GET'])
 @jwt_required()
 def get_me():
@@ -66,10 +99,21 @@ def register():
         dj_name = data.get('dj_name')
         user_type = data.get('user_type')
 
-        users_with_email = session.query(User).filter_by(email=email).first()
-
+        # Check if all required fields are provided
         if not (email and password and dj_name):
             return jsonify({'message': 'Please fill out all required fields.'}), 400
+
+        # Validate email format
+        if not is_valid_email(email):
+            return jsonify({'message': 'Please provide a valid email address.'}), 400
+
+        # Normalize email to lowercase for consistency
+        email = email.lower().strip()
+
+        users_with_email = session.query(User).filter_by(email=email).first()
+
+        # if not (email and password and dj_name):
+        #     return jsonify({'message': 'Please fill out all required fields.'}), 400
 
 
         if users_with_email:
@@ -106,19 +150,46 @@ def login():
     # create a new session
     session = SessionLocal()
 
-    users_with_email = session.query(User).filter_by(email=user_email).all()
+    # users_with_email = session.query(User).filter_by(email=user_email).all()
 
-    if not (user_email and user_password):
+    # if not (user_email and user_password):
+    #         return jsonify({'message': 'Please fill out all required fields.'}), 400
+
+    # if not users_with_email:
+    #     return jsonify({'message': 'User not found'}), 404
+    
+    # if not bcrypt.checkpw(user_password.encode('utf-8'), users_with_email[0].password.encode('utf-8')):
+    #     return jsonify({'message': 'Invalid password'}), 401
+    
+    # access_token = create_access_token(identity=users_with_email[0].email)
+    # return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
+    try:
+        # Check if all required fields are provided
+        if not (user_email and user_password):
             return jsonify({'message': 'Please fill out all required fields.'}), 400
 
-    if not users_with_email:
-        return jsonify({'message': 'User not found'}), 404
-    
-    if not bcrypt.checkpw(user_password.encode('utf-8'), users_with_email[0].password.encode('utf-8')):
-        return jsonify({'message': 'Invalid password'}), 401
-    
-    access_token = create_access_token(identity=users_with_email[0].email)
-    return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
+        # Validate email format
+        if not is_valid_email(user_email):
+            return jsonify({'message': 'Please provide a valid email address.'}), 400
+
+        # Normalize email to lowercase for consistency
+        user_email = user_email.lower().strip()
+
+        users_with_email = session.query(User).filter_by(email=user_email).all()
+
+        if not users_with_email:
+            return jsonify({'message': 'User not found'}), 404
+        
+        if not bcrypt.checkpw(user_password.encode('utf-8'), users_with_email[0].password.encode('utf-8')):
+            return jsonify({'message': 'Invalid password'}), 401
+        
+        access_token = create_access_token(identity=users_with_email[0].email)
+        return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
+
+    except Exception as e:
+        return jsonify({'message': f'Error during login: {str(e)}'}), 500
+    finally:
+        session.close()
 
 
 @app.route('/analyze-emotion', methods=['POST'])
