@@ -20,25 +20,12 @@ const Stack = createStackNavigator();
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
-  // useEffect(() => {
-  //   const checkToken = async () => {
-  //     const token = await AsyncStorage.getItem('token');
-  //     console.log("Token in App: ", token)
-  //     setIsAuthenticated(!!token);
-  //   };
-
-  //   checkToken();
-  // });
-
   useEffect(() => {
     const checkToken = async () => {
       try {
         const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
-        console.log("Token in App: ", credentials ? 'Token exists' : 'No token');
         setIsAuthenticated(!!credentials);
       } catch (error) {
-        console.error('Keychain error:', error);
         setIsAuthenticated(false);
       }
     };

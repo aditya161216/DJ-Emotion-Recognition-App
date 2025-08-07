@@ -51,17 +51,16 @@ export default function MainScreen({ navigation }: Props) {
 
     // check whether the user's JWT token is stored in async storage; i.e. whether they are logged in
     useEffect(() => {
-        // const checkToken = async () => {
-        //     const token = await AsyncStorage.getItem('token');
-        //     console.log("Token in main: ", token)
-        // };
-
         const checkToken = async () => {
             try {
                 const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
                 return credentials ? credentials.password : null;
             } catch (error) {
-                console.error('Keychain error:', error);
+                Alert.alert(
+                    'Keychain Error',
+                    'Failed to get user credentials.',
+                    [{ text: 'OK' }]
+                );
                 return null;
             }
         };
@@ -71,31 +70,11 @@ export default function MainScreen({ navigation }: Props) {
 
     // get the current user data
     useEffect(() => {
-        // const getUserData = async () => {
-        //     const token = await AsyncStorage.getItem('token');
-        //     if (!token) {
-        //         console.warn("No token found");
-        //         return;
-        //     }
-
-        //     const res = await fetch(`${API_PROD_BASE_URL}/me`, {
-        //         method: 'GET',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'Authorization': `Bearer ${token}`,
-        //         },
-        //     });
-
-        //     const data = await res.json();
-        //     setCurrentUser(data.dj_name);
-        //     console.log("Current DJ Name:", data.dj_name);
-        // };
 
         const getUserData = async () => {
             try {
                 const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
                 if (!credentials) {
-                    console.warn("No credentials found");
                     setCurrentUser('Guest');
                     return;
                 }
@@ -117,7 +96,11 @@ export default function MainScreen({ navigation }: Props) {
                     setCurrentUser('Guest');
                 }
             } catch (error) {
-                console.error("Failed to get credentials:", error);
+                Alert.alert(
+                    'Keychain Error',
+                    'Failed to get user credentials.',
+                    [{ text: 'OK' }]
+                );
                 setCurrentUser('Guest');
             }
         };
@@ -147,8 +130,11 @@ export default function MainScreen({ navigation }: Props) {
                 failOnCancel: false,
             });
         } catch (err) {
-            console.error("Error saving file:", err);
-            Alert.alert("Error", "Failed to save or share the file.");
+            Alert.alert(
+                'Error',
+                'Failed to save or share the file.',
+                [{ text: 'OK' }]
+            );
         }
     };
 
@@ -177,7 +163,11 @@ export default function MainScreen({ navigation }: Props) {
 
         } catch (err) {
             if (!DocumentPicker.isCancel(err)) {
-                console.error('Import error:', err);
+                Alert.alert(
+                    'Import Error',
+                    'Failed to import emotion log.',
+                    [{ text: 'OK' }]
+                );
             }
         }
     };
@@ -395,12 +385,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
         fontWeight: '400',
-        flex: 1,  // Add this to prevent text cutoff
-        marginRight: 10,  // Add spacing between username and button
+        flex: 1,  
+        marginRight: 10, 
     },
     logoutButton: {
         paddingVertical: 6,
-        paddingHorizontal: 0,  // Remove horizontal padding for better alignment
+        paddingHorizontal: 0, 
     },
     logoutText: {
         fontSize: 14,
@@ -414,13 +404,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     primaryButton: {
-        marginVertical: 20,  // Changed from marginBottom to add space above and below
+        marginVertical: 20,  
     },
     secondaryAction: {
         alignItems: 'center',
         paddingVertical: 12,
-        // paddingBottom: -5
-        // Removed marginBottom to let container handle spacing
     },
     secondaryActionText: {
         fontSize: 15,

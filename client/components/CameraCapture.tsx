@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     Modal,
     TouchableOpacity,
+    Alert,
 } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
@@ -68,7 +69,6 @@ export default function CameraCapture({
                 });
                 photoLibraryGranted = true;
             } catch (error:any) {
-                console.log('Photo library permission denied or error:', error);
                 // If error contains "access", it's likely a permission issue
                 if (error.includes('access')) {
                     photoLibraryGranted = false;
@@ -117,42 +117,48 @@ export default function CameraCapture({
         if (!cameraRef.current || isRecording) return;
 
         try {
-            console.log("Starting video recording...");
             await cameraRef.current.startRecording({
                 onRecordingFinished: async (video) => {
-                    console.log('Recording finished:', video);
                     try {
                         const videoPath = video.path.startsWith('file://')
                             ? video.path
                             : `file://${video.path}`;
                         await CameraRoll.save(videoPath, { type: 'video' });
-                        console.log('Video saved to camera roll');
                     } catch (error) {
-                        console.error('Failed to save video:', error);
+                        Alert.alert('Save Failed', 'Unable to save video to camera roll. Please check permissions and try again.');
                     }
                 },
                 onRecordingError: (error) => {
-                    console.error('Recording error:', error);
+                    Alert.alert(
+                        'Recording Error',
+                        'Failed to start recording. Please restart the app and try again.',
+                        [{ text: 'OK' }]
+                    );
                     setIsRecording(false);
                 },
             });
             setIsRecording(true);
-            console.log("Video recording started");
         } catch (error) {
-            console.error('Failed to start recording:', error);
+            Alert.alert(
+                'Recording Error',
+                'Failed to start recording. Please restart the app and try again.',
+                [{ text: 'OK' }]
+            );
         }
     };
 
     const stopVideoRecording = async () => {
         if (!cameraRef.current || !isRecording) return;
 
-        console.log("Stopping video recording...");
         try {
             await cameraRef.current.stopRecording();
             setIsRecording(false);
-            console.log("Video recording stopped");
         } catch (err) {
-            console.error("Error stopping recording:", err);
+            Alert.alert(
+                'Recording Error',
+                'Failed to stop recording.  Please restart the app and try again.',
+                [{ text: 'OK' }]
+            );
         }
     };
 
@@ -182,7 +188,11 @@ export default function CameraCapture({
             // Clean up photo file
             await RNFS.unlink(photo.path);
         } catch (err) {
-            console.error('Capture error:', err);
+            Alert.alert(
+                'Capture Error',
+                'Failed to capture photo. Please restart the app and try again.',
+                [{ text: 'OK' }]
+            );
             setCurrentEmotion('Error');
         } finally {
             setLoading(false);

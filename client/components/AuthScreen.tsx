@@ -26,7 +26,6 @@ export default function AuthScreen({ navigation }: Props) {
     useEffect(() => {
         const checkToken = async () => {
             const token = await AsyncStorage.getItem('token');
-            console.log("Token in Auth: ", token)
         };
 
         checkToken();
@@ -36,7 +35,7 @@ export default function AuthScreen({ navigation }: Props) {
         const endpoint = isRegistering ? '/register' : '/login';
 
         const payload = isRegistering
-            ? { email, password, dj_name: djName, user_type: 'FREE' }   // CHANGE LATER
+            ? { email, password, dj_name: djName, user_type: 'FREE' } 
             : { email, password };
 
         try {
@@ -60,7 +59,6 @@ export default function AuthScreen({ navigation }: Props) {
                     email,                // username
                     data.access_token     // password (token)
                 );
-                console.log("JWT token is already present")
                 navigation.replace('Main'); // take them to MainScreen
             } else if (isRegistering) {
                 Alert.alert('Success', 'Registration successful. You can now log in.');
@@ -68,8 +66,6 @@ export default function AuthScreen({ navigation }: Props) {
             }
 
         } catch (err: any) {
-            console.error('Connection error:', err);
-            console.log('URL attempted:', `${API_PROD_BASE_URL}${endpoint}`);
             Alert.alert('Error', 'Failed to connect to server.', err);
         }
     };

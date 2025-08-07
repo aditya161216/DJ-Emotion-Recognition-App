@@ -128,31 +128,3 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
 });
-
-// Usage examples in your MainScreen:
-/*
-// Primary button (cyan with black text)
-<CustomButton 
-    title="Start"
-    onPress={() => {}}
-    variant="primary"
-    size="large"
-    icon="🎵"
-/>
-
-// Secondary button (dark with cyan text)
-<CustomButton 
-    title="Import/View Past Log"
-    onPress={() => {}}
-    variant="secondary"
-    size="medium"
-/>
-
-// Outline button (transparent with cyan border)
-<CustomButton 
-    title="Logout"
-    onPress={() => {}}
-    variant="outline"
-    size="small"
-/>
-*/

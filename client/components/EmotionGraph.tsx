@@ -40,7 +40,6 @@ export default function EmotionGraph({
     const [chartType, setChartType] = useState<ChartType>('engagement');
 
     const scores = data.map(e => emotionToScore(e.emotion));
-    // const emotionValues = data.map(e => emotionToValue(e.emotion));
 
     const startTime = data.length > 0 ? data[0].timestamp : 0;
 
@@ -60,9 +59,6 @@ export default function EmotionGraph({
         labels: timeLabels,
         datasets: [{ data: scores, strokeWidth: 2 }],
     };
-
-    // Emotion chart data - no longer needed
-    const emotionValues = data.map(e => emotionToValue(e.emotion));
 
     const dynamicWidth = Math.max(screenWidth - 40, data.length * 60);
 

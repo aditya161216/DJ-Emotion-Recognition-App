@@ -7,9 +7,6 @@ import time
 from plyer import notification
 
 
-# DEMO file, uses laptop webcam to test emotion detection
-
-
 # start video capture
 cap = cv.VideoCapture(0)
 
@@ -17,13 +14,6 @@ cap = cv.VideoCapture(0)
 detector = FER()
 camera_address = None
 
-# get wifi address of your iphone camera (or relevant)
-# camera_address = "http://11.22.19.194:4747/video"
-
-# read from camera on iphone
-# cap.open(camera_address)
-
-# track timestamp for last notification sent
 last_notification_time = time.time()
 
 # send notifs every x seconds
@@ -55,8 +45,6 @@ def send_notification(text_to_send, notification_interval):
 
     # check if enough time has passed since last notification
     if current_time - last_notification_time > notification_interval:
-        # print("Here")
-        # print(current_time, last_notification_time)
         notification.notify(title="Alert", message=text_to_send, timeout=5)
         last_notification_time = current_time 
 
@@ -74,11 +62,6 @@ while cap.isOpened():
     rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
     rgb_frame = cv.flip(rgb_frame, 1)     # invert camera
 
-    # check if we need to reorient the image being displayed on the laptop
-    # if camera_address:
-        # rgb_frame = cv.rotate(rgb_frame, cv.ROTATE_90_COUNTERCLOCKWISE)    # rotate image counter clockwise
-
-    # rgb_frame = cv.rotate(rgb_frame, cv.ROTATE_90_COUNTERCLOCKWISE)    # rotate image counter clockwise
     emotions = detector.detect_emotions(rgb_frame)    # detect multiple emotions
 
     # get size of the current frame
@@ -119,15 +102,12 @@ while cap.isOpened():
         top_overall_emotion = max(c, key=c.get)
 
         # print out top overall emotion
-        # print(top_overall_emotion)
         text = f"Top crowd emotion: {top_overall_emotion}"
-        # cv.putText(rgb_frame, text, (50, 50), cv.FONT_HERSHEY_SIMPLEX, font_size, (0, 0, 255), font_thickness)
         cv.putText(rgb_frame, text, (int(frame_width * 0.05), int(frame_height * 0.1)), cv.FONT_HERSHEY_SIMPLEX, font_size, (0, 0, 255), font_thickness)
 
 
     # now give feedback based on the crowd emotions
     curr_text = get_user_feedback(top_overall_emotion)
-    # cv.putText(rgb_frame, curr_text, (50, 100), cv.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 2)
     cv.putText(rgb_frame, curr_text, (int(frame_width * 0.05), int(frame_height * 0.15)), cv.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 2)
 
     # send notification to user

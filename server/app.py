@@ -113,10 +113,6 @@ def register():
 
         users_with_email = session.query(User).filter_by(email=email).first()
 
-        # if not (email and password and dj_name):
-        #     return jsonify({'message': 'Please fill out all required fields.'}), 400
-
-
         if users_with_email:
             return jsonify({'message': 'An account with this email already exists. Please log in or use a different email.'}), 409
 
@@ -151,19 +147,6 @@ def login():
     # create a new session
     session = SessionLocal()
 
-    # users_with_email = session.query(User).filter_by(email=user_email).all()
-
-    # if not (user_email and user_password):
-    #         return jsonify({'message': 'Please fill out all required fields.'}), 400
-
-    # if not users_with_email:
-    #     return jsonify({'message': 'User not found'}), 404
-    
-    # if not bcrypt.checkpw(user_password.encode('utf-8'), users_with_email[0].password.encode('utf-8')):
-    #     return jsonify({'message': 'Invalid password'}), 401
-    
-    # access_token = create_access_token(identity=users_with_email[0].email)
-    # return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
     try:
         # Check if all required fields are provided
         if not (user_email and user_password):
@@ -207,8 +190,6 @@ def analyze_emotion():
         nparr = np.frombuffer(img_bytes, np.uint8)
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        # preprocess the image (if required)
-        # preprocessed_frame = analyze_and_preprocess(frame)
     except Exception as e:
         return jsonify({'error': f'Failed to decode image: {str(e)}'}), 400
 
