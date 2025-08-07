@@ -1,17 +1,15 @@
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthScreen from "./components/AuthScreen";
 import MainScreen from './components/MainScreen';
 import HowToUseScreen from './components/HowToUseScreen';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
-import { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
 import SplashScreen from './components/SplashScreen';
 import 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
 import * as Keychain from 'react-native-keychain';
-
+import BetaAccessScreen from './components/BetaAccessScreen';
 
 enableScreens();
 
@@ -19,30 +17,58 @@ const Stack = createStackNavigator();
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [hasBetaAccess, setHasBetaAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkToken = async () => {
+    const checkAccess = async () => {
+
       try {
-        const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
-        setIsAuthenticated(!!credentials);
+        await Keychain.resetInternetCredentials({ server: 'groovegauge.beta' });
+        console.log('Beta access reset for testing');
       } catch (error) {
+        console.log('Error resetting beta access:', error);
+      }
+      try {
+        // Check beta access first
+        const betaAccess = await Keychain.getInternetCredentials('groovegauge.beta');
+        // Check if betaAccess is not false and has the expected password
+        if (betaAccess && typeof betaAccess !== 'boolean' && betaAccess.password === 'granted') {
+          setHasBetaAccess(true);
+        } else {
+          setHasBetaAccess(false);
+        }
+
+        // Then check auth
+        const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
+        // Check if credentials exist and are not false
+        if (credentials && typeof credentials !== 'boolean') {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        setHasBetaAccess(false);
         setIsAuthenticated(false);
       }
     };
 
-    checkToken();
-  });
+    checkAccess();
+  }, []);
 
-
-  // show loading screen if not authenticated
-  if (isAuthenticated === null) {
+  // Show loading while checking
+  if (isAuthenticated === null || hasBetaAccess === null) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+        <ActivityIndicator size="large" color="#00FFFF" />
       </View>
     );
   }
 
+  // Determine initial route
+  let initialRoute = 'Splash';
+  if (!hasBetaAccess) {
+    initialRoute = 'BetaAccess';
+  }
 
   return (
     <NavigationContainer>
@@ -50,23 +76,22 @@ export default function App() {
         screenOptions={{
           headerShown: false,
         }}
-        initialRouteName="Splash"
+        initialRouteName={initialRoute}
       >
+        <Stack.Screen name="BetaAccess" component={BetaAccessScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen
           name="Auth"
           component={AuthScreen}
           options={{
-            ...TransitionPresets.SlideFromLeftIOS, 
-            gestureDirection: 'vertical', 
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureDirection: 'horizontal',
             headerShown: false,
           }}
         />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="HowToUse" component={HowToUseScreen} />
       </Stack.Navigator>
-
     </NavigationContainer>
   );
 }
-

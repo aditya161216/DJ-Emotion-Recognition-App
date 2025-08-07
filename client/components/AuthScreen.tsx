@@ -53,13 +53,12 @@ export default function AuthScreen({ navigation }: Props) {
             }
 
             if (!isRegistering && data.access_token) {
-                // await AsyncStorage.setItem('token', data.access_token);
                 await Keychain.setInternetCredentials(
-                    'djemotionanalyzer.com',  // server
-                    email,                // username
-                    data.access_token     // password (token)
+                    'djemotionanalyzer.com',
+                    email,
+                    data.access_token
                 );
-                navigation.replace('Main'); // take them to MainScreen
+                navigation.replace('Main');
             } else if (isRegistering) {
                 Alert.alert('Success', 'Registration successful. You can now log in.');
                 setIsRegistering(false);
