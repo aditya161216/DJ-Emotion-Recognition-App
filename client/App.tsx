@@ -21,13 +21,6 @@ export default function App() {
 
   useEffect(() => {
     const checkAccess = async () => {
-
-      try {
-        await Keychain.resetInternetCredentials({ server: 'groovegauge.beta' });
-        console.log('Beta access reset for testing');
-      } catch (error) {
-        console.log('Error resetting beta access:', error);
-      }
       try {
         // Check beta access first
         const betaAccess = await Keychain.getInternetCredentials('groovegauge.beta');
