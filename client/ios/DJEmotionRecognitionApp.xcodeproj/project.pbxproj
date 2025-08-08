@@ -12,6 +12,8 @@
 		59224E9F979E2EE4B740BCB6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		D2CDFEC12E4569340042F11B /* Custom Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D2CDFEC02E4569330042F11B /* Custom Launch Screen.storyboard */; };
+		D2FBCC2A2E45B88300856968 /* DJ EMOTION ANALYZER (5).png in Resources */ = {isa = PBXBuildFile; fileRef = D2FBCC292E45B88200856968 /* DJ EMOTION ANALYZER (5).png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,7 +26,9 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-DJEmotionRecognitionApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DJEmotionRecognitionApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = DJEmotionRecognitionApp/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DJEmotionRecognitionApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D2CDFEC02E4569330042F11B /* Custom Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Custom Launch Screen.storyboard"; sourceTree = "<group>"; };
 		D2D08BBD2DAC689700A752E6 /* DJEmotionRecognitionApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "DJEmotionRecognitionApp copy-Info.plist"; path = "/Users/adityavikrant/DJEmotionRecognitionApp/ios/DJEmotionRecognitionApp copy-Info.plist"; sourceTree = "<absolute>"; };
+		D2FBCC292E45B88200856968 /* DJ EMOTION ANALYZER (5).png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "DJ EMOTION ANALYZER (5).png"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -71,12 +75,14 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				D2CDFEC02E4569330042F11B /* Custom Launch Screen.storyboard */,
 				13B07FAE1A68108700A75B9A /* DJEmotionRecognitionApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
 				D2D08BBD2DAC689700A752E6 /* DJEmotionRecognitionApp copy-Info.plist */,
+				D2FBCC292E45B88200856968 /* DJ EMOTION ANALYZER (5).png */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -160,6 +166,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2CDFEC12E4569340042F11B /* Custom Launch Screen.storyboard in Resources */,
+				D2FBCC2A2E45B88300856968 /* DJ EMOTION ANALYZER (5).png in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				59224E9F979E2EE4B740BCB6 /* PrivacyInfo.xcprivacy in Resources */,
@@ -265,6 +273,8 @@
 				DEVELOPMENT_TEAM = 52RV2FP64Z;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = DJEmotionRecognitionApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GrooveGauge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -294,6 +304,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 52RV2FP64Z;
 				INFOPLIST_FILE = DJEmotionRecognitionApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GrooveGauge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

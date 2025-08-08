@@ -1455,6 +1455,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-splash-screen (3.3.0):
+    - React-Core
   - react-native-video (6.12.0):
     - DoubleConversion
     - glog
@@ -2250,6 +2252,7 @@ DEPENDENCIES:
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-video (from `../node_modules/react-native-video`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -2382,6 +2385,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-document-picker"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-splash-screen:
+    :path: "../node_modules/react-native-splash-screen"
   react-native-video:
     :path: "../node_modules/react-native-video"
   React-NativeModulesApple:
@@ -2511,6 +2516,7 @@ SPEC CHECKSUMS:
   react-native-cameraroll: 41084e42ab4ec08940452737aca3fd5e0edc63fe
   react-native-document-picker: ba3181e6ec97907f9266f2dbe16c0e5ce18ebb95
   react-native-safe-area-context: 7e926a200d4bc9c56562275743705c6b56176455
+  react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594
   react-native-video: 75309708e5e46a796f5ad2f26f7278c210c9fc86
   React-NativeModulesApple: f8c91c74d5d223944c7b7fdeb0695d8ee73f899c
   React-oscompat: faff1df234d57a7368b56e9642222dde9eb9f422

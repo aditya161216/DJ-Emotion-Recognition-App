@@ -150,6 +150,7 @@ const sections: Section[] = [
                 'Keep your device plugged in for longer sets',
                 'Review past sessions before similar gigs',
                 'Share successful set analyses with other DJs',
+                'Switch your phone to silent mode to disable camera sounds'
             ]
         }
     }
