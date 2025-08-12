@@ -9,7 +9,7 @@ import SplashScreen from './components/SplashScreen';
 import 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
 import * as Keychain from 'react-native-keychain';
-import BetaAccessScreen from './components/BetaAccessScreen';
+import SettingsScreen from './components/SettingsScreen';
 
 enableScreens();
 
@@ -17,19 +17,10 @@ const Stack = createStackNavigator();
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [hasBetaAccess, setHasBetaAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        // Check beta access first
-        const betaAccess = await Keychain.getInternetCredentials('groovegauge.beta');
-        // Check if betaAccess is not false and has the expected password
-        if (betaAccess && typeof betaAccess !== 'boolean' && betaAccess.password === 'granted') {
-          setHasBetaAccess(true);
-        } else {
-          setHasBetaAccess(false);
-        }
 
         // Then check auth
         const credentials = await Keychain.getInternetCredentials('djemotionanalyzer.com');
@@ -40,7 +31,6 @@ export default function App() {
           setIsAuthenticated(false);
         }
       } catch (error) {
-        setHasBetaAccess(false);
         setIsAuthenticated(false);
       }
     };
@@ -49,7 +39,7 @@ export default function App() {
   }, []);
 
   // Show loading while checking
-  if (isAuthenticated === null || hasBetaAccess === null) {
+  if (isAuthenticated === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
         <ActivityIndicator size="large" color="#00FFFF" />
@@ -57,11 +47,6 @@ export default function App() {
     );
   }
 
-  // Determine initial route
-  let initialRoute = 'Splash';
-  if (!hasBetaAccess) {
-    initialRoute = 'BetaAccess';
-  }
 
   return (
     <NavigationContainer>
@@ -69,9 +54,8 @@ export default function App() {
         screenOptions={{
           headerShown: false,
         }}
-        initialRouteName={initialRoute}
+        initialRouteName="Splash"
       >
-        <Stack.Screen name="BetaAccess" component={BetaAccessScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen
           name="Auth"
@@ -84,6 +68,15 @@ export default function App() {
         />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="HowToUse" component={HowToUseScreen} />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureDirection: 'horizontal',
+            headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -15,7 +15,7 @@ import ConfirmationModal from './ConfirmationModal';
 import CustomButton from './CustomButton';
 import { API_BASE_URL, API_PROD_BASE_URL } from '@env'
 
-type CameraPosition = 'front' | 'back' | 'external';
+type CameraPosition = 'front' | 'back';
 
 // check for backend url
 if (!API_PROD_BASE_URL) {
@@ -68,7 +68,7 @@ export default function CameraCapture({
                     assetType: 'Videos',
                 });
                 photoLibraryGranted = true;
-            } catch (error:any) {
+            } catch (error: any) {
                 // If error contains "access", it's likely a permission issue
                 if (error.includes('access')) {
                     photoLibraryGranted = false;
@@ -288,7 +288,7 @@ export default function CameraCapture({
                 >
                     <View style={styles.modalBox}>
                         <Text style={styles.modalTitle}>Select Camera</Text>
-                        {(['front', 'back', 'external'] as CameraPosition[]).map((pos) => (
+                        {(['front', 'back'] as CameraPosition[]).map((pos) => (
                             <TouchableOpacity
                                 key={pos}
                                 style={[

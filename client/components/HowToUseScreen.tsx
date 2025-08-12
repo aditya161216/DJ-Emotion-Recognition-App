@@ -98,7 +98,7 @@ const sections: Section[] = [
                 'Video is automatically saved to your camera roll',
                 'Emotion analysis results are displayed in a graph'
             ],
-            
+
         }
     },
     {

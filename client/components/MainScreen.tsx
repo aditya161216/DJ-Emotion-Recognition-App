@@ -197,16 +197,10 @@ export default function MainScreen({ navigation }: Props) {
                         <View style={styles.headerBar}>
                             <Text style={styles.userInfo}>{currentUser || 'Guest'}</Text>
                             <TouchableOpacity
-                                onPress={async () => {
-                                    // await AsyncStorage.removeItem('token');
-                                    await Keychain.resetInternetCredentials({
-                                        server: "djemotionanalyzer.com"
-                                    });
-                                    navigation.navigate('Auth');
-                                }}
-                                style={styles.logoutButton}
+                                onPress={() => navigation.navigate('Settings')}
+                                style={styles.settingsButton}
                             >
-                                <Text style={styles.logoutText}>Sign Out</Text>
+                                <Text style={styles.settingsText}>Settings</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -385,12 +379,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
         fontWeight: '400',
-        flex: 1,  
-        marginRight: 10, 
+        flex: 1,
+        marginRight: 10,
     },
     logoutButton: {
         paddingVertical: 6,
-        paddingHorizontal: 0, 
+        paddingHorizontal: 0,
     },
     logoutText: {
         fontSize: 14,
@@ -404,7 +398,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     primaryButton: {
-        marginVertical: 20,  
+        marginVertical: 20,
     },
     secondaryAction: {
         alignItems: 'center',
@@ -476,5 +470,14 @@ const styles = StyleSheet.create({
         color: '#ccc',
         fontSize: 14,
         textAlign: 'center',
+    },
+    settingsButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 0,
+    },
+    settingsText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '400',
     },
 });

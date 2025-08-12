@@ -175,6 +175,44 @@ def login():
     finally:
         session.close()
 
+@app.route('/delete-account', methods=['DELETE'])
+@jwt_required()
+def delete_account():
+    session = SessionLocal()
+    try:
+        # get the user's email from the JWT token
+        user_email = get_jwt_identity()
+        
+        # find the user in the database
+        user = session.query(User).filter_by(email=user_email).first()
+        
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+        
+        # store user info for response before deletion
+        deleted_email = user.email
+        deleted_dj_name = user.dj_name
+        
+        # delete the user 
+        session.delete(user)
+        session.commit()
+        
+        
+        return jsonify({
+            'message': 'Account successfully deleted',
+            'deleted_user': {
+                'email': deleted_email,
+                'dj_name': deleted_dj_name
+            }
+        }), 200
+        
+    except Exception as e:
+        session.rollback()
+        app.logger.error(f"Error deleting user account: {str(e)}")
+        return jsonify({'message': 'Error deleting account. Please try again later.'}), 500
+    finally:
+        session.close()
+
 
 @app.route('/analyze-emotion', methods=['POST'])
 def analyze_emotion():
