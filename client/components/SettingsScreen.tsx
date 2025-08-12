@@ -128,8 +128,7 @@ export default function SettingsScreen({ navigation }: Props) {
                 {/* Info Section */}
                 <View style={styles.infoSection}>
                     <Text style={styles.infoText}>
-                        Deleting your account will permanently remove all your data,
-                        including session history and analytics. This action cannot be undone.
+                        Deleting your account will permanently remove all your data. This action cannot be undone.
                     </Text>
                 </View>
             </View>
@@ -180,9 +179,9 @@ const styles = StyleSheet.create({
     },
     title: {
         color: '#fff',
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '300',
-        letterSpacing: -0.5,
+        letterSpacing: 0.5,
     },
     placeholder: {
         width: 60, // Same width as back button for centering
@@ -206,7 +205,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 16,
+        paddingVertical: 12,
         paddingHorizontal: 20,
         backgroundColor: 'rgba(255, 255, 255, 0.03)',
         borderRadius: 8,
@@ -232,7 +231,7 @@ const styles = StyleSheet.create({
     },
     infoSection: {
         paddingHorizontal: 40,
-        paddingTop: 40,
+        paddingTop: 20,
     },
     infoText: {
         color: '#666',
