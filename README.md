@@ -32,9 +32,9 @@ JWT-based auth system to securely store and retrieve session data.
 3. Emotion data is stored and visualized on a graph.
 4. DJs can review which songs engaged the crowd best.
 
-## Setup (Coming Soon)
+## Setup 
 
-🚧 Currently in beta. App is deployed and undergoing testing ahead of a public App Store release.
+App is deployed to the App Store - click link in description to download.
 
 ## Screenshots
 
