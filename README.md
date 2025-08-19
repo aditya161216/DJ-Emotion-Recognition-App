@@ -40,11 +40,11 @@ App is deployed to the App Store - click link in description to download.
 
 > Beta build - Currently undergoing testing.
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/08cca286-3e68-41f7-9e84-d281a42c786a" width="250" />
-  <img src="https://github.com/user-attachments/assets/e822c040-88d8-4823-9a7f-e8453083a1c1" width="250" />
-  <img src="https://github.com/user-attachments/assets/85d712fc-980c-47cf-a4c4-c05fc65fd04d" width="250" />
+  <img width="250" alt="IMG_2798 2" src="https://github.com/user-attachments/assets/ffa65d71-31d3-4293-881f-8d6ee0407372" /> 
+  <img width="250" alt="IMG_2799 2" src="https://github.com/user-attachments/assets/6ed47ded-9a1d-4d63-b8a1-e883eeeeba9b" />
   <img src="https://github.com/user-attachments/assets/176a7acf-3f07-429b-a9ec-2aec223fec1a" width="250" />
-  <img src="https://github.com/user-attachments/assets/b16420f5-9df9-4f7a-826a-9d77b0002de9" width="250" />
+  <img width="250" alt="IMG_2802 2" src="https://github.com/user-attachments/assets/2c363e74-6eb1-4e91-a072-54e35ff60c26" />
+  <img width="250" alt="IMG_2803 2" src="https://github.com/user-attachments/assets/5b285231-94fd-40f7-b621-832e46ef7228" />
 </p>
 
 
