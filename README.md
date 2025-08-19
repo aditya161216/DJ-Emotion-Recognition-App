@@ -1,4 +1,4 @@
-# DJ Emotion Recognition App
+# GrooveGauge
 
 A mobile app for DJs to analyze and visualize **crowd emotions in real-time** during live sets, helping improve song choices and audience engagement.
 
