@@ -38,7 +38,6 @@ App is deployed to the App Store - click link in description to download.
 
 ## Screenshots
 
-> Beta build - Currently undergoing testing.
 <p align="center">
   <img width="250" alt="IMG_2798 2" src="https://github.com/user-attachments/assets/ffa65d71-31d3-4293-881f-8d6ee0407372" /> 
   <img width="250" alt="IMG_2799 2" src="https://github.com/user-attachments/assets/6ed47ded-9a1d-4d63-b8a1-e883eeeeba9b" />
