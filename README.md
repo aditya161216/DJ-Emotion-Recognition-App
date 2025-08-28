@@ -11,8 +11,8 @@ Uses the device camera and a Flask backend with `fer` and OpenCV to detect emoti
 Displays graphs of crowd emotion trends over time to help DJs reflect and improve future sets.
 
 📱 **Cross-Platform**  
-- **iOS (React Native)** 
-- **Android (React Native; Coming Soon)** 
+- **iOS** 
+- **Android (Coming Soon)** 
 
 🔐 **User Authentication**  
 JWT-based auth system to securely store and retrieve session data.
